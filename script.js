@@ -1,6 +1,6 @@
 const baseURL = window.location.hostname === "localhost"
     ? "" 
-    : "https://risekk37.github.io/GIS-for-deisng-practices_Kitea-Julia";
+    : "https://risekk37.github.io/Data_Viz_Kitae_Jaejun/";
     
 const map1 = new maplibregl.Map({
         container: 'map1',
