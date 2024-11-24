@@ -5,14 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map with GeoJSON and Triangles</title>
     <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-    <style>
-        #map {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
+    <div id="sidebar-toggle">
+        <button id="toggle-btn">Menu</button> <!-- 'Menu' button -->
+    </div>
+    
+    <div id="sidebar">
+        <div id="Title">
+            Economic Burdens and Barriers to Safe Delivery
+        </div>
+        <div class="button-container">
+            <button id="btn1">Delivery Fee</button>
+            <button id="btn2">Delivery Usage by Borough</button>
+            <button id="btn3">Package Theft</button>
+        </div>
+        <div id="content">
+            <h2 id="content-title">Delivery Fee</h2>
+            <p id="content-text">This section will display information about delivery fees.</p>
+            <div id="table-container">
+                <!-- Here you can dynamically insert a table or any other content -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Example 1</td>
+                            <td>$10</td>
+                        </tr>
+                        <tr>
+                            <td>Example 2</td>
+                            <td>$15</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+
     <div id="map"></div>
     <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script> <!-- D3.js 추가 -->

@@ -1,8 +1,40 @@
+// JavaScript to toggle sidebar visibility
+document.getElementById("toggle-btn").addEventListener("click", function() {
+    const sidebar = document.getElementById("sidebar");
+
+    // Toggle the 'hidden' class on sidebar
+    sidebar.classList.toggle("hidden");
+
+    // Check if sidebar is hidden or not
+    if (sidebar.classList.contains("hidden")) {
+        // When sidebar is hidden, move the button to the left
+        this.style.left = '0';
+    } else {
+        // When sidebar is open, move the button to the right side of the sidebar
+        this.style.left = 'calc(30% + 40px)';
+    }
+});
+
+// Button click event listeners for changing content
+document.getElementById("btn1").addEventListener("click", function() {
+    document.getElementById("content-title").textContent = "Delivery Fee";
+    document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
+    // Update table or content for this section
+});
+
+
+
+document.getElementById("btn3").addEventListener("click", function() {
+    document.getElementById("content-title").textContent = "Package Theft";
+    document.getElementById("content-text").textContent = "This section will display information about package theft.";
+    // Update table or content for this section
+});
+
 // Initialize the MapLibre map
 const map = new maplibregl.Map({
     container: 'map', // The id of the HTML element to use for the map
     style: 'positron.json', // Path to the Maputnik style JSON
-    center: [-73.935242, 40.730610], // Initial center [lng, lat]
+    center: [-74.135242, 40.730610], // Initial center [lng, lat]
     zoom: 9.8, // Initial zoom level
     minZoom: 9.5, // Minimum zoom level
     maxZoom: 13, // Maximum zoom level
@@ -211,24 +243,12 @@ map.on('load', () => {
                     return `translate(${x},${y})`;
                 });
             });
-
-            // Add Borough button
-            const button = document.createElement("button");
-            button.innerHTML = "Borough";
-            button.style.position = "absolute";
-            button.style.top = "10px";
-            button.style.right = "10px";
-            button.style.padding = "10px";
-            button.style.background = "rgba(0, 0, 0, 0.5)";
-            button.style.color = "white";
-            button.style.border = "none";
-            button.style.cursor = "pointer";
-            document.body.appendChild(button);
+         
             
             const path = d3.geoPath();  // No need to redefine this inside the listener
 let isBoroughActive = false;
 
-button.addEventListener("click", function() {
+document.getElementById("btn2").addEventListener("click", function() {
     isBoroughActive = !isBoroughActive;
     
     // Update triangle colors based on the `Destrict` property
