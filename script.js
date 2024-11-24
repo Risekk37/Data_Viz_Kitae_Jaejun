@@ -1,65 +1,355 @@
-const baseURL = window.location.hostname === "localhost" ? "" : "https://risekk37.github.io/Data_Viz_Kitae_Jaejun/";
+// Initialize the MapLibre map
+const map = new maplibregl.Map({
+    container: 'map', // The id of the HTML element to use for the map
+    style: 'positron.json', // Path to the Maputnik style JSON
+    center: [-73.935242, 40.730610], // Initial center [lng, lat]
+    zoom: 9.8, // Initial zoom level
+    minZoom: 9.5, // Minimum zoom level
+    maxZoom: 13, // Maximum zoom level
+    maxBounds: [
+        [-74.835242, 40.230610], // Southwest corner [longitude, latitude]
+        [-73.035242, 41.230610] // Northeast corner [longitude, latitude]
+    ] // Restrict map to the boundaries of New York City
+});
 
-        const map = new maplibregl.Map({
-            container: 'map',
-            style: `${baseURL}/positron.json`, // Replace with your MapLibre style URL
-            center: [-73.935242, 40.730610],
-            zoom: 10
-        });
+map.addControl(new maplibregl.NavigationControl(), 'top-left');
 
-        const geojsonUrl = `${baseURL}/Unit.geojson`;
+// Helper function to compute centroids of polygons (MultiPolygon support)
+function computeCentroid(polygon) {
+    const coords = polygon.geometry.coordinates[0][0]; // Use first ring of first polygon
+    const n = coords.length;
 
-        // Initialize Three.js renderer
-        const renderer = new THREE.WebGLRenderer({ alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.domElement.style.position = 'absolute';
-        renderer.domElement.style.pointerEvents = 'none';
-        document.body.appendChild(renderer.domElement);
+    let x = 0, y = 0;
+    coords.forEach(([lon, lat]) => {
+        x += lon;
+        y += lat;
+    });
 
-        // Set up Three.js scene and camera
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 100); // Start position of the camera
+    return [x / n, y / n];
+}
 
-        const coneGeometry = new THREE.ConeGeometry(0.01, 1, 32); // Base size
-        const material = new THREE.MeshBasicMaterial({ color: 0xff5733 });
+// Helper function to create a triangle path with fixed base and dynamic height
+function createTrianglePath(unit) {
+    const base = 10; // Fixed base size
+    const height = Math.pow(unit, 2) * 2; // Dynamic height based on the unit value
 
-        map.on('load', async () => {
-            // Load GeoJSON data
-            const response = await fetch(geojsonUrl);
-            const geojson = await response.json();
+    return `M ${-base / 2} 0 L ${base / 2} 0 L 0 ${-height} Z`;
+}
 
-            geojson.features.forEach(feature => {
-                const [lng, lat] = feature.geometry.coordinates;
-                const height = feature.properties.Unit / 10; // Adjust based on the Unit value
-
-                const cone = new THREE.Mesh(coneGeometry.clone(), material.clone());
-                cone.scale.set(0.01, height, 0.01); // Adjust height
-                cone.position.copy(projectToThreeJS(lng, lat, 0));
-                scene.add(cone);
+map.on('load', () => {
+    fetch('Unit_F.geojson')
+        .then(response => response.json())
+        .then(geojsonData => {
+            // Add GeoJSON layers to the map
+            map.addSource('geojson-data', {
+                type: 'geojson',
+                data: geojsonData
             });
 
-            // Sync map and Three.js
-            map.on('render', () => {
-                camera.position.copy(map.getCenter());
-                camera.position.z = 500; // Adjust camera position for better view
-
-                renderer.render(scene, camera);
+            // Add a base fill layer (invisible)
+            map.addLayer({
+                id: 'geojson-layer',
+                type: 'fill',
+                source: 'geojson-data',
+                paint: {
+                    'fill-color': 'transparent',
+                    'fill-opacity': 0
+                }
             });
-        });
 
-        // Utility: Convert GeoJSON coordinates to Three.js
-        function projectToThreeJS(lng, lat, z) {
-            const merc = map.project([lng, lat]);
-            // Scaling for proper 3D rendering
-            const x = merc.x - window.innerWidth / 2; 
-            const y = -merc.y + window.innerHeight / 2;
-            return new THREE.Vector3(x, y, z);
+            // Add an outline layer for highlighting polygons
+            map.addLayer({
+                id: 'geojson-outline',
+                type: 'line',
+                source: 'geojson-data',
+                paint: {
+                    'line-color': '#ff0000',
+                    'line-opacity': 0, // Initially hidden
+                    'line-width': 2
+                },
+                filter: ['==', 'id', ''] // Filter to show no polygons initially
+            });
+
+            // Create an SVG overlay for the triangles
+            const svg = d3.select(map.getCanvasContainer())
+                .append("svg")
+                .attr("class", "overlay")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .style("position", "absolute")
+                .style("top", 0)
+                .style("left", 0);
+
+            // Define gradients
+            const defs = svg.append("defs");
+
+            // Default gradient (red)
+            const defaultGradient = defs.append("linearGradient")
+                .attr("id", "default-gradient")
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "0%")
+                .attr("y2", "100%");
+
+            defaultGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "red")
+                .attr("stop-opacity", 1);
+
+            defaultGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "red")
+                .attr("stop-opacity", 0);
+
+            // Clicked gradient (blue)
+            const clickedGradient = defs.append("linearGradient")
+                .attr("id", "clicked-gradient")
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "0%")
+                .attr("y2", "100%");
+
+            clickedGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "blue") // Change to desired color
+                .attr("stop-opacity", 1);
+
+            clickedGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "blue") // Change to desired color
+                .attr("stop-opacity", 0);
+
+            // Draw triangles for all polygons
+            const features = geojsonData.features;
+
+            let selectedTriangle = null; // To keep track of the selected triangle
+            let popup = null; // To keep track of the popup element
+
+            const triangles = svg.selectAll("path")
+                .data(features)
+                .enter()
+                .append("path")
+                .attr("transform", d => {
+                    const centroid = computeCentroid(d);
+                    const { x, y } = map.project(centroid);
+                    return `translate(${x},${y})`;
+                })
+                .attr("d", d => createTrianglePath(d.properties.Unit))
+                .attr("fill", "url(#default-gradient)") // Default gradient fill
+                .attr("stroke", "transparent")
+                .attr("stroke-width", 1.5)
+                .on("click", function(event, d) {
+                    // Reset previously selected triangle
+                    if (selectedTriangle) {
+                        selectedTriangle.attr("fill", "url(#default-gradient)");
+                    }
+
+                    // Highlight the clicked polygon
+                    map.setFilter('geojson-outline', ['==', 'id', d.properties.id]); // Assuming each polygon has a unique 'id'
+                    map.setPaintProperty('geojson-outline', 'line-opacity', 1);
+
+                    // Set clicked triangle as selected
+                    selectedTriangle = d3.select(this);
+                    selectedTriangle.attr("fill", "url(#clicked-gradient)"); // Change fill to clicked gradient
+
+                    // Remove existing popup
+                    if (popup) {
+                        popup.remove();
+                        popup = null;
+                    }
+
+                    // Create popup
+                    const centroid = computeCentroid(d);
+                    const { x, y } = map.project(centroid);
+
+                    popup = d3.select("body")
+                        .append("div")
+                        .attr("class", "popup")
+                        .style("position", "absolute")
+                        .style("background-color", "white")
+                        .style("border", "1px solid black")
+                        .style("padding", "10px")
+                        .style("border-radius", "5px")
+                        .style("box-shadow", "0px 4px 6px rgba(0, 0, 0, 0.1)")
+                        .style("top", `${y - 50}px`)
+                        .style("left", `${x + 20}px`);
+
+                    popup.html(`
+                        <strong>Census Tract:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Geographic Area Name"]}<br>
+                        <strong>Median Income:</strong> $${d.properties["Re_Income_New_York_Specific_Counties_Estimate!!Households!!Median income (dollars)"]}<br>
+                        <strong>Delivery Fee Unit:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Units"]}<br>
+                        <strong>Destict:</strong> ${d.properties["Destrict"]}
+                    `);
+                });
+
+            // Clear selection when clicking outside triangles
+            map.on('click', (e) => {
+                const featuresAtPoint = map.queryRenderedFeatures(e.point, { layers: ['geojson-layer'] });
+
+                if (featuresAtPoint.length === 0) {
+                    // Reset the outline and selected triangle if no feature is clicked
+                    map.setPaintProperty('geojson-outline', 'line-opacity', 0);
+                    map.setFilter('geojson-outline', ['==', 'id', '']); // Reset filter
+
+                    if (selectedTriangle) {
+                        selectedTriangle.attr("fill", "url(#default-gradient)");
+                        selectedTriangle = null;
+                    }
+
+                    if (popup) {
+                        popup.remove();
+                        popup = null;
+                    }
+                }
+            });
+
+            // Re-draw triangles on map move or zoom
+            map.on('move', () => {
+                triangles.attr("transform", d => {
+                    const centroid = computeCentroid(d);
+                    const { x, y } = map.project(centroid);
+                    return `translate(${x},${y})`;
+                });
+            });
+
+            // Add Borough button
+            const button = document.createElement("button");
+            button.innerHTML = "Borough";
+            button.style.position = "absolute";
+            button.style.top = "10px";
+            button.style.right = "10px";
+            button.style.padding = "10px";
+            button.style.background = "rgba(0, 0, 0, 0.5)";
+            button.style.color = "white";
+            button.style.border = "none";
+            button.style.cursor = "pointer";
+            document.body.appendChild(button);
+            
+            const path = d3.geoPath();  // No need to redefine this inside the listener
+let isBoroughActive = false;
+
+button.addEventListener("click", function() {
+    isBoroughActive = !isBoroughActive;
+    
+    // Update triangle colors based on the `Destrict` property
+    triangles.attr("fill", d => {
+        if (isBoroughActive) {
+            const borough = d.properties["Destrict"];
+            
+            // Return the corresponding gradient for each borough
+            return borough === 1 ? "url(#borough-gradient-1)" :
+                   borough === 2 ? "url(#borough-gradient-2)" :
+                   borough === 3 ? "url(#borough-gradient-3)" :
+                   borough === 4 ? "url(#borough-gradient-4)" :
+                   "url(#default-gradient)"; // Default gradient for other boroughs
+        } else {
+            return "url(#default-gradient)"; // Default gradient when borough is not active
         }
+    });
 
-        // Update Three.js renderer on resize
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+    // Handle Destrict.geojson layer visibility
+    if (isBoroughActive) {
+        fetch('Destrict.geojson')
+        .then(response => response.json())
+        .then(boroughData => {
+            map.addSource('borough-data', {
+                type: 'geojson',
+                data: boroughData
+            });
+    
+            // Add a fill layer with color based on the 'Destrict' property
+            map.addLayer({
+                id: 'borough-fill',
+                type: 'fill',
+                source: 'borough-data',
+                paint: {
+                    'fill-color': [
+                        'match', 
+                        ['get', 'Destrict'], 
+                        1, '#cc0000', // Replace 'value1' with actual values from your 'Destrict' field
+                        2, '#1f3d99', // Replace 'value2' with another value
+                        3, '#ffff53',
+                        4, '#a1661a',  // And so on, for each distinct 'Destrict' value
+                        '#808080' // Default color for values not matched
+                    ],
+                    'fill-opacity': 0.1 // Adjust the fill opacity as needed
+                }
+            });
+    
+            // Add a line layer for the borough outlines
+            map.addLayer({
+                id: 'borough-outline',
+                type: 'line',
+                source: 'borough-data',
+                paint: {
+                    'line-color': '#ffffff', // Outline color
+                    'line-opacity': 0.3,
+                    'line-width': 1 // Adjust the line width as needed
+                }
+            });
         });
+        
+        // Load Destrict.geojson and add MultiPolygon outline using D3
+        d3.json("Destrict.geojson").then(function(geojsonData) {
+            // Select and append the MultiPolygon paths with a white outline
+            svg.selectAll(".destrict")
+                .data(geojsonData.features)
+                .enter()
+                .append("path")
+                .attr("class", "destrict")
+                .attr("d", path) // Use geoPath to generate the path from coordinates
+                .attr("fill", "none") // No fill color for the MultiPolygon
+                .attr("stroke", "white") // Set the border color to white
+                .attr("stroke-width", 2) // Set stroke width for visibility
+                .attr("opacity", 0.5); // Set opacity to make the outline more visible
+        });
+
+    } else {
+        // Remove the Destrict layer from Mapbox
+        map.removeLayer('borough-fill');
+        map.removeLayer('borough-outline');
+        map.removeSource('borough-data');
+
+        // Remove the SVG paths from the D3 visualization
+        svg.selectAll(".destrict").remove();
+
+        // Reset the outline opacity (if needed)
+        map.setPaintProperty('geojson-outline', 'line-opacity', 0);
+    }
+});
+
+// Define borough gradients for triangle color updates
+const boroughGradients = defs.selectAll(".borough-gradient")
+    .data([1, 2, 3, 4]) // Define borough IDs
+    .enter()
+    .append("linearGradient")
+    .attr("class", "borough-gradient")
+    .attr("id", d => `borough-gradient-${d}`)
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "0%")
+    .attr("y2", "100%");
+
+boroughGradients.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", d => {
+        // Define the color for the start of each gradient based on borough
+        return d === 1 ? "blue" :
+               d === 2 ? "green" :
+               d === 3 ? "purple" :
+               d === 4 ? "orange" : "red";
+    })
+    .attr("stop-opacity", 1);
+
+boroughGradients.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", d => {
+        // Define the color for the end of each gradient based on borough
+        return d === 1 ? "lightblue" :
+               d === 2 ? "lightgreen" :
+               d === 3 ? "lightpurple" :
+               d === 4 ? "lightorange" : "lightred";
+    })
+    .attr("stop-opacity", 0);
+        });
+});
