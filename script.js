@@ -15,25 +15,10 @@ document.getElementById("toggle-btn").addEventListener("click", function() {
     }
 });
 
-// Button click event listeners for changing content
-document.getElementById("btn1").addEventListener("click", function() {
-    document.getElementById("content-title").textContent = "Delivery Fee";
-    document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
-    // Update table or content for this section
-});
-
-
-
-document.getElementById("btn3").addEventListener("click", function() {
-    document.getElementById("content-title").textContent = "Package Theft";
-    document.getElementById("content-text").textContent = "This section will display information about package theft.";
-    // Update table or content for this section
-});
-
 // Initialize the MapLibre map
 const map = new maplibregl.Map({
     container: 'map', // The id of the HTML element to use for the map
-    style: 'positron.json', // Path to the Maputnik style JSON
+    style: 'positron_D.json', // Path to the Maputnik style JSON
     center: [-74.135242, 40.730610], // Initial center [lng, lat]
     zoom: 9.8, // Initial zoom level
     minZoom: 9.5, // Minimum zoom level
@@ -45,6 +30,14 @@ const map = new maplibregl.Map({
 });
 
 map.addControl(new maplibregl.NavigationControl(), 'top-left');
+
+// Hide all map layers
+function hideAllLayers() {
+    map.removeLayer('Amazon_Loc');
+    map.removeLayer('geojson-layer');
+    map.removeLayer('geojson-outline');
+    // Add any other layers you want to hide here
+}
 
 // Helper function to compute centroids of polygons (MultiPolygon support)
 function computeCentroid(polygon) {
@@ -59,7 +52,34 @@ function computeCentroid(polygon) {
 
     return [x / n, y / n];
 }
+// Function to define and add the Amazon layer to the map
+function defineAmazonLayer() {
+    fetch('Amazon_Location.geojson')
+        .then(response => response.json())
+        .then(geojsonData => {
+            map.addSource('Amazon', {
+                type: 'geojson',
+                data: geojsonData
+            });
 
+            // Add a base fill layer (invisible) for Amazon location
+            map.addLayer({
+                id: 'Amazon_Loc',
+                type: 'circle',
+                source: 'Amazon',
+                paint: {
+                    'circle-radius': 10,            // Circle size
+                    'circle-color': 'rgba(0, 0, 0, 0)',  // Transparent fill
+                    'circle-stroke-width': 2,        // Increased border width for visibility
+                    'circle-stroke-color': '#ff0000',  // Set border color to red
+                    'circle-opacity': 1,
+                    'circle-stroke-opacity': 1       // Full opacity for border
+                }
+            });
+        });
+}fetch('Amazon_Location.geojson')
+.then(response => response.json())
+.catch(error => console.error('Error loading GeoJSON:', error));
 // Helper function to create a triangle path with fixed base and dynamic height
 function createTrianglePath(unit) {
     const base = 10; // Fixed base size
@@ -110,7 +130,8 @@ map.on('load', () => {
                 .attr("height", "100%")
                 .style("position", "absolute")
                 .style("top", 0)
-                .style("left", 0);
+                .style("left", 0)
+                .style("display", "none");
 
             // Define gradients
             const defs = svg.append("defs");
@@ -246,9 +267,25 @@ map.on('load', () => {
          
             
             const path = d3.geoPath();  // No need to redefine this inside the listener
-let isBoroughActive = false;
 
+            let isBoroughActive = false;
+
+            function hideAllContents() {
+                document.getElementById("content-title").textContent = "";
+                document.getElementById("content-text").textContent = "";
+                d3.select(".overlay").style("display", "none");
+            }
+           
+// Button click event listeners for changing content
+document.getElementById("btn1").addEventListener("click", function() {
+    hideAllContents();
+    document.getElementById("content-title").textContent = "Delivery Fee";
+    document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
+    d3.select(".overlay").style("display", "block");
+});
 document.getElementById("btn2").addEventListener("click", function() {
+    hideAllContents();
+    d3.select(".overlay").style("display", "block");
     isBoroughActive = !isBoroughActive;
     
     // Update triangle colors based on the `Destrict` property
@@ -372,4 +409,10 @@ boroughGradients.append("stop")
     })
     .attr("stop-opacity", 0);
         });
+});
+document.getElementById("btn3").addEventListener("click", function() {
+    hideAllContents();
+    document.getElementById("content-title").textContent = "Package Theft";
+    document.getElementById("content-text").textContent = "This section will display information about package theft.";
+    // Update table or content for this section
 });
