@@ -31,21 +31,6 @@ const map = new maplibregl.Map({
 
 map.addControl(new maplibregl.NavigationControl(), 'top-left');
 
-
-// Helper function to compute centroids of polygons (MultiPolygon support)
-function computeCentroid(polygon) {
-    const coords = polygon.geometry.coordinates[0][0]; // Use first ring of first polygon
-    const n = coords.length;
-
-    let x = 0, y = 0;
-    coords.forEach(([lon, lat]) => {
-        x += lon;
-        y += lat;
-    });
-
-    return [x / n, y / n];
-}
-// Function to define and add the Amazon layer to the map
 function defineAmazonLayer() {
     fetch('Amazon_Location.geojson')
         .then(response => response.json())
@@ -95,7 +80,8 @@ function defineTraderLayer() {
                 }
             });
         });
-}function defineWalmartLayer() {
+}
+function defineWalmartLayer() {
     fetch('Walmart_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
@@ -119,7 +105,8 @@ function defineTraderLayer() {
                 }
             });
         });
-}function defineWholeLayer() {
+}
+function defineWholeLayer() {
     fetch('Whole_Food_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
@@ -148,6 +135,21 @@ defineAmazonLayer();
 defineTraderLayer();
 defineWalmartLayer();
 defineWholeLayer();
+
+// Helper function to compute centroids of polygons (MultiPolygon support)
+function computeCentroid(polygon) {
+    const coords = polygon.geometry.coordinates[0][0]; // Use first ring of first polygon
+    const n = coords.length;
+
+    let x = 0, y = 0;
+    coords.forEach(([lon, lat]) => {
+        x += lon;
+        y += lat;
+    });
+
+    return [x / n, y / n];
+}
+// Function to define and add the Amazon layer to the map
 
 function createTrianglePath(unit) {
     const base = 10; // Fixed base size
@@ -333,6 +335,143 @@ map.on('load', () => {
                 });
             });
          
+            const boroughSvg = d3.select(map.getCanvasContainer())
+    .append("svg")
+    .attr("class", "overlay")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .style("position", "absolute")
+    .style("top", 0)
+    .style("left", 0)
+    .style("display", "none");  // Initially hidden
+
+// Define the function to toggle visibility of the SVG
+function toggleBoroughSvg(isVisible) {
+    boroughSvg.style("display", isVisible ? "block" : "none");
+}
+
+// Function to update triangle colors based on the 'Destrict' property
+function updateTriangleColors(isBoroughActive) {
+    boroughSvg.selectAll(".destrict")
+        .attr("fill", d => {
+            const borough = d.properties["Destrict"];
+            // Return a gradient fill based on the borough's ID
+            return borough === 1 ? "url(#borough-gradient-1)" :
+                   borough === 2 ? "url(#borough-gradient-2)" :
+                   borough === 3 ? "url(#borough-gradient-3)" :
+                   borough === 4 ? "url(#borough-gradient-4)" :
+                   "url(#default-gradient)"; // Default gradient for other boroughs
+        });
+}
+
+// Define borough gradients for triangle color updates
+const boroughGradients = d3.select("svg defs")
+    .selectAll(".borough-gradient")
+    .data([1, 2, 3, 4]) // Define borough IDs
+    .enter()
+    .append("linearGradient")
+    .attr("class", "borough-gradient")
+    .attr("id", d => `borough-gradient-${d}`)
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "0%")
+    .attr("y2", "100%");
+
+// Append gradient stops based on borough ID
+boroughGradients.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", d => {
+        // Define the color for the start of each gradient based on borough
+        return d === 1 ? "blue" :
+               d === 2 ? "green" :
+               d === 3 ? "purple" :
+               d === 4 ? "orange" : "red";
+    })
+    .attr("stop-opacity", 1);
+
+boroughGradients.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", d => {
+        // Define the color for the end of each gradient based on borough
+        return d === 1 ? "lightblue" :
+               d === 2 ? "lightgreen" :
+               d === 3 ? "lightpurple" :
+               d === 4 ? "lightorange" : "lightred";
+    })
+    .attr("stop-opacity", 0);
+
+// Function to load and display Destrict.geojson layer
+function handleBoroughLayer(isBoroughActive) {
+    // Show/Hide SVG based on borough activity
+    toggleBoroughSvg(isBoroughActive);
+
+    if (isBoroughActive) {
+        // Fetch and add Destrict.geojson source to map
+        fetch('Destrict.geojson')
+        .then(response => response.json())
+        .then(boroughData => {
+            map.addSource('borough-data', {
+                type: 'geojson',
+                data: boroughData
+            });
+
+            // Add a fill layer with color based on the 'Destrict' property
+            map.addLayer({
+                id: 'borough-fill',
+                type: 'fill',
+                source: 'borough-data',
+                paint: {
+                    'fill-color': [
+                        'match', 
+                        ['get', 'Destrict'], 
+                        1, '#cc0000', 
+                        2, '#1f3d99', 
+                        3, '#ffff53',
+                        4, '#a1661a',  
+                        '#808080' // Default color for other boroughs
+                    ],
+                    'fill-opacity': 0.1 
+                }
+            });
+
+            // Add a line layer for the borough outlines
+            map.addLayer({
+                id: 'borough-outline',
+                type: 'line',
+                source: 'borough-data',
+                paint: {
+                    'line-color': '#ffffff', 
+                    'line-opacity': 0.3,
+                    'line-width': 1 
+                }
+            });
+        });
+
+        // Load Destrict.geojson and add MultiPolygon outline using D3
+        d3.json("Destrict.geojson").then(function(geojsonData) {
+            boroughSvg.selectAll(".destrict")
+                .data(geojsonData.features)
+                .enter()
+                .append("path")
+                .attr("class", "destrict")
+                .attr("d", path) // Use geoPath to generate the path from coordinates
+                .attr("fill", "none") // No fill color for the MultiPolygon
+                .attr("stroke", "white") // Set the border color to white
+                .attr("stroke-width", 2) // Set stroke width for visibility
+                .attr("opacity", 0.5)
+                .style("display", "block"); // Make sure the paths are visible when borough is active
+        });
+    } else {
+        // Hide the SVG by calling the toggle function
+        toggleBoroughSvg(false);
+
+        // Remove the Destrict layer from Mapbox
+        map.removeLayer('borough-fill');
+        map.removeLayer('borough-outline');
+        map.removeSource('borough-data');
+    }
+}
+        
 
             const path = d3.geoPath();  // No need to redefine this inside the listener
 
@@ -381,7 +520,8 @@ document.getElementById("btn0").addEventListener("click", function() {
         defineAmazonLayer();
         defineTraderLayer();
         defineWalmartLayer();
-        defineWholeLayer();      
+        defineWholeLayer();
+        handleBoroughLayer(false);      
     });
 // Button click event listeners for changing content
 document.getElementById("btn1").addEventListener("click", function() {
@@ -389,137 +529,15 @@ document.getElementById("btn1").addEventListener("click", function() {
     document.getElementById("content-title").textContent = "Delivery Fee";
     document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
     d3.select(".overlay").style("display", "block");
+    handleBoroughLayer(false);
 });
 document.getElementById("btn2").addEventListener("click", function() {
     hideAllContents();
     d3.select(".overlay").style("display", "block");
-    isBoroughActive = !isBoroughActive;
-    
-    // Update triangle colors based on the `Destrict` property
-    triangles.attr("fill", d => {
-        if (isBoroughActive) {
-            const borough = d.properties["Destrict"];
-            
-            // Return the corresponding gradient for each borough
-            return borough === 1 ? "url(#borough-gradient-1)" :
-                   borough === 2 ? "url(#borough-gradient-2)" :
-                   borough === 3 ? "url(#borough-gradient-3)" :
-                   borough === 4 ? "url(#borough-gradient-4)" :
-                   "url(#default-gradient)"; // Default gradient for other boroughs
-        } else {
-            return "url(#default-gradient)"; // Default gradient when borough is not active
-        }
-    });
-
-    // Handle Destrict.geojson layer visibility
-    if (isBoroughActive) {
-        fetch('Destrict.geojson')
-        .then(response => response.json())
-        .then(boroughData => {
-            map.addSource('borough-data', {
-                type: 'geojson',
-                data: boroughData
-            });
-    
-            // Add a fill layer with color based on the 'Destrict' property
-            map.addLayer({
-                id: 'borough-fill',
-                type: 'fill',
-                source: 'borough-data',
-                paint: {
-                    'fill-color': [
-                        'match', 
-                        ['get', 'Destrict'], 
-                        1, '#cc0000', // Replace 'value1' with actual values from your 'Destrict' field
-                        2, '#1f3d99', // Replace 'value2' with another value
-                        3, '#ffff53',
-                        4, '#a1661a',  // And so on, for each distinct 'Destrict' value
-                        '#808080' // Default color for values not matched
-                    ],
-                    'fill-opacity': 0.1 // Adjust the fill opacity as needed
-                }
-            });
-    
-            // Add a line layer for the borough outlines
-            map.addLayer({
-                id: 'borough-outline',
-                type: 'line',
-                source: 'borough-data',
-                paint: {
-                    'line-color': '#ffffff', // Outline color
-                    'line-opacity': 0.3,
-                    'line-width': 1 // Adjust the line width as needed
-                }
-            });
-        });
-        
-        // Load Destrict.geojson and add MultiPolygon outline using D3
-        d3.json("Destrict.geojson").then(function(geojsonData) {
-            // Select and append the MultiPolygon paths with a white outline
-            svg.selectAll(".destrict")
-                .data(geojsonData.features)
-                .enter()
-                .append("path")
-                .attr("class", "destrict")
-                .attr("d", path) // Use geoPath to generate the path from coordinates
-                .attr("fill", "none") // No fill color for the MultiPolygon
-                .attr("stroke", "white") // Set the border color to white
-                .attr("stroke-width", 2) // Set stroke width for visibility
-                .attr("opacity", 0.5); // Set opacity to make the outline more visible
-        });
-
-    } else {
-        // Remove the Destrict layer from Mapbox
-        map.removeLayer('borough-fill');
-        map.removeLayer('borough-outline');
-        map.removeSource('borough-data');
-
-        // Remove the SVG paths from the D3 visualization
-        svg.selectAll(".destrict").remove();
-
-        // Reset the outline opacity (if needed)
-        map.setPaintProperty('geojson-outline', 'line-opacity', 0);
-    }
-});
-
-// Define borough gradients for triangle color updates
-const boroughGradients = defs.selectAll(".borough-gradient")
-    .data([1, 2, 3, 4]) // Define borough IDs
-    .enter()
-    .append("linearGradient")
-    .attr("class", "borough-gradient")
-    .attr("id", d => `borough-gradient-${d}`)
-    .attr("x1", "0%")
-    .attr("y1", "0%")
-    .attr("x2", "0%")
-    .attr("y2", "100%");
-
-boroughGradients.append("stop")
-    .attr("offset", "0%")
-    .attr("stop-color", d => {
-        // Define the color for the start of each gradient based on borough
-        return d === 1 ? "blue" :
-               d === 2 ? "green" :
-               d === 3 ? "purple" :
-               d === 4 ? "orange" : "red";
-    })
-    .attr("stop-opacity", 1);
-
-boroughGradients.append("stop")
-    .attr("offset", "100%")
-    .attr("stop-color", d => {
-        // Define the color for the end of each gradient based on borough
-        return d === 1 ? "lightblue" :
-               d === 2 ? "lightgreen" :
-               d === 3 ? "lightpurple" :
-               d === 4 ? "lightorange" : "lightred";
-    })
-    .attr("stop-opacity", 0);
-        });
+    handleBoroughLayer(true);
 });
 document.getElementById("btn3").addEventListener("click", function() {
     hideAllContents();
     document.getElementById("content-title").textContent = "Package Theft";
     document.getElementById("content-text").textContent = "This section will display information about package theft.";
-    // Update table or content for this section
-});
+})})});
