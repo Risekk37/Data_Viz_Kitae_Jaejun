@@ -11,7 +11,7 @@ document.getElementById("toggle-btn").addEventListener("click", function() {
         this.style.left = '0';
     } else {
         // When sidebar is open, move the button to the right side of the sidebar
-        this.style.left = 'calc(30% + 40px)';
+        this.style.left = 'calc(40% + 40px)';
     }
 });
 // 메뉴 버튼 클릭 시 팝업 열기/닫기
@@ -36,7 +36,7 @@ document.getElementById("btn0").addEventListener("click", function () {
 const map = new maplibregl.Map({
     container: 'map', // The id of the HTML element to use for the map
     style: 'positron_D.json', // Path to the Maputnik style JSON
-    center: [-74.035242, 40.730610], // Initial center [lng, lat]
+    center: [-75.135242, 40.730610], // Initial center [lng, lat]
     zoom: 10, // Initial zoom level
     minZoom: 9.5, // Minimum zoom level
     maxZoom: 13, // Maximum zoom level
@@ -297,9 +297,9 @@ definePackageLayer();
                     
                     function createBarChart(data, container) {
                         const processedData = processCSV(data);
-                        const margin = { top: 20, right: 30, bottom: 60, left: 50 };
-                        const width = 450 - margin.left - margin.right;
-                        const height = 400 - margin.top - margin.bottom;
+                        const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+                        const width = 640 - margin.left - margin.right;
+                        const height = 300 - margin.top - margin.bottom;
                     
                         d3.select(container).selectAll("*").remove();
                     
@@ -408,7 +408,7 @@ definePackageLayer();
                         .on("mousemove", function(event) {
                             tooltip
                                 // Tooltip을 마우스 오른쪽에 10px 정도 떨어지도록 설정
-                                .attr("transform", `translate(${event.pageX -90}, ${event.pageY - 170})`);
+                                .attr("transform", `translate(${event.pageX -90}, ${event.pageY - 280})`);
                         })
                         .on("mouseout", function() {
                             tooltip.style("opacity", 0);
@@ -453,9 +453,9 @@ definePackageLayer();
                     ];
                     function createLineChart(rawData2, container) {
                         // 컨테이너 크기 설정
-                        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-                        const width = 450 - margin.left - margin.right;
-                        const height = 400 - margin.top - margin.bottom;
+                        const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+                        const width = 640 - margin.left - margin.right;
+                        const height = 450 - margin.top - margin.bottom;
                     
                         // SVG 요소 추가
                         const svg = d3.select(container)
@@ -563,11 +563,51 @@ definePackageLayer();
                             .attr("x", width) // 오른쪽 여백
                             .attr("y", 10) // 위쪽 여백
                             .attr("text-anchor", "end") // 오른쪽 정렬
-                            .attr("font-size", "12px")
+                            .attr("font-size", "14px")
                             .style("font-weight", "bold") // 굵게 설정
                             .style("font-style", "italic") // 이탤릭 설정
                             .style("fill", "rgba(0, 45, 143, 0.7)") // 색상 설정
                             .text("Unit Number more than 4: 31.7%"); // 표시할 텍스트
+                         // 툴팁 추가
+                            const tooltip = svg.append("g")
+                            .style("opacity", 0) // 초기에는 숨겨 놓기
+                            .attr("class", "tooltip");
+
+                            tooltip.append("rect")
+                            .attr("width", 150)
+                            .attr("height", 30)
+                            .attr("fill", "rgb(255,255,255,0.5)")
+                            .attr("stroke", "rgb(0, 45, 143, 0.5)");
+
+                             tooltip.append("text")
+                            .attr("x", 10)
+                            .attr("y", 20)
+                            .style("font-size", "12px");
+
+                        // 선분 위에 마우스를 올렸을 때 Y값을 표시하는 팝업 추가
+                             svg.selectAll(".line-point")
+                            .data(rawData2)
+                            .enter()
+                            .append("circle")
+                            .attr("class", "line-point")
+                            .attr("cx", d => x(d.x))
+                            .attr("cy", d => y(d.y))
+                            .attr("r", 10)
+                            .attr("fill", "transparent")
+                            .attr("stroke", "transparent")
+                            .attr("stroke-width", 1)
+                            .on("mouseover", function(event, d) {
+                                tooltip.style("opacity", 1) // 툴팁 표시
+                                    .attr("transform", `translate(${x(d.x) - 160},${y(d.y) - 120})`) // 툴팁 위치 설정
+                                    .select("text")
+                                    .text(`Borough number: ${d.y}`); // Y 값 표시
+                            })
+                            .on("mousemove", function(event) {
+                                tooltip.attr("transform", `translate(${event.pageX -160},${event.pageY - 120})`); // 마우스 위치에 따라 툴팁 위치 업데이트
+                            })
+                            .on("mouseout", function() {
+                                tooltip.style("opacity", 0); // 툴팁 숨기기
+                            });
                         }
                         
                         const rawData3 = [
@@ -584,8 +624,8 @@ definePackageLayer();
                             }));
                         
                             // Set up margins and dimensions for the chart
-                            const margin = { top: 20, right: 30, bottom: 20, left: 50 };
-                            const width = 450 - margin.left - margin.right;
+                            const margin = { top: 20, right: 10, bottom: 20, left: 30 };
+                            const width = 320 - margin.left - margin.right;
                             const height = 140 - margin.top - margin.bottom;
                         
                             // Clear any previous content
@@ -686,7 +726,27 @@ definePackageLayer();
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "12px")
                                 .text(d => `${d.value}%`); // Add "%" symbol to the value
-                                 }
+                               
+                                svg.selectAll(".value-label")
+                                .data(data)
+                                .enter()
+                                .append("text")
+                                .attr("class", "value-label")
+                                .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
+                                .attr("dy", ".35em") // Vertical alignment
+                                .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                .attr("fill", "rgb(255,255,255,0.8)")
+                                .style("font-size", "12px")
+                                .text(d => `${d.value}%`); // Add "%" symbol to the value
+                             // Add title at the bottom-right of the SVG
+                                svg.append("text")
+                                .attr("x", width - 2) // Position it towards the right side of the chart
+                                .attr("y", height +15) // Position it at the bottom
+                                .attr("text-anchor", "end") // Align text to the right side
+                                .style("font-size", "14px")
+                                .text("Package Theft Concerned"); // Title text    
+                            }
                               
                         const rawData4 = [
                             [1, 34],
@@ -704,8 +764,8 @@ definePackageLayer();
                             }));
                         
                             // Set up margins and dimensions for the chart
-                            const margin = { top: 20, right: 30, bottom: 20, left: 50 };
-                            const width = 450 - margin.left - margin.right;
+                            const margin = { top: 20, right: 10, bottom: 20, left: 0 };
+                            const width = 320 - margin.left - margin.right;
                             const height = 200 - margin.top - margin.bottom;
                         
                             // Clear any previous content
@@ -804,7 +864,14 @@ definePackageLayer();
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "12px")
                                 .text(d => `${d.value}%`); // Add "%" symbol to the value
-                                 }
+                             // Add title at the bottom-right of the SVG
+                                svg.append("text")
+                                .attr("x", width - 2) // Position it towards the right side of the chart
+                                .attr("y", height +15) // Position it at the bottom
+                                .attr("text-anchor", "end") // Align text to the right side
+                                .style("font-size", "14px")
+                                .text("Number of Stolen Packages"); // Title text     
+                            }
                                  
                                  const rawData5 = [
                                     ['Track the Delivery Process', 52],
@@ -822,8 +889,8 @@ definePackageLayer();
                                     }));
                                 
                                     // Set up margins and dimensions for the chart
-                                    const margin = { top: 20, right: 30, bottom: 20, left: 50 };
-                                    const width = 450 - margin.left - margin.right;
+                                    const margin = { top: 0, right: 30, bottom: 20, left: 60 };
+                                    const width = 600 - margin.left - margin.right;
                                     const height = 200 - margin.top - margin.bottom;
                                 
                                     // Clear any previous content
@@ -907,7 +974,7 @@ definePackageLayer();
                                         .attr("dy", ".35em") // Vertical alignment
                                         .attr("text-anchor", "start") // Align text to the left of the bar
                                         .attr("fill", "rgb(255,255,255,0.8)")
-                                        .style("font-size", "8px")
+                                        .style("font-size", "10px")
                                         .text(d => d.category);
                                 
                                     // Add value labels
@@ -921,10 +988,58 @@ definePackageLayer();
                                         .attr("dy", ".35em") // Vertical alignment
                                         .attr("text-anchor", "end") // Align text to the right end of the background bar
                                         .attr("fill", "rgb(255,255,255,0.8)")
+                                        .style("font-size", "14px")
+                                        .text(d => `${d.value}%`); // Add "%" symbol to the value
+                                        svg.selectAll(".value-label")
+                                        .data(data)
+                                        .enter()
+                                        .append("text")
+                                        .attr("class", "value-label")
+                                        .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
+                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
+                                        .attr("dy", ".35em") // Vertical alignment
+                                        .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                        .attr("fill", "rgb(255,255,255,0.8)")
                                         .style("font-size", "12px")
                                         .text(d => `${d.value}%`); // Add "%" symbol to the value
-                                }
+                                     // Add title at the bottom-right of the SVG
+                                        svg.append("text")
+                                        .attr("x", width - 2) // Position it towards the right side of the chart
+                                        .attr("y", height +15) // Position it at the bottom
+                                        .attr("text-anchor", "end") // Align text to the right side
+                                        .style("font-size", "14px")
+                                        .text("How People Prevent Package Theft"); // Title text    
                                 
+                                    }
+                                const container2 = document.getElementById("table-container2");
+
+                                // 글 내용과 스타일 정의
+                                const chartTitles = [
+                                    { text: "44%", left: 40, top: 150, fontSize: "18px", color: "#1D3459", fontWeight: "bold" },
+                                    { text: "of Americans have<br>had a Package Stolen", left: 40, top: 170, fontSize: "14px", color: "#556580", fontWeight: "normal" },
+                                    { text: "$112.3", left: 210, top: 150, fontSize: "18px", color: "#1D3459", fontWeight: "bold" },
+                                    { text: "Average Value of <br>Stolen Packages", left: 210, top: 170, fontSize: "14px", color: "#556580", fontWeight: "normal" }
+                                ];
+                                
+                                // 글 생성 및 스타일 적용
+                                chartTitles.forEach(titleInfo => {
+                                    // 제목 생성
+                                    const titleElement = document.createElement("div");
+                                    titleElement.innerHTML = titleInfo.text;   // 글 내용 추가
+                                    titleElement.style.position = "absolute";  // 절대 위치
+                                    titleElement.style.textAlign = "left";  // 글 가운데 정렬
+                                    titleElement.style.marginBottom = "14px";  // 차트와의 간격
+                                    titleElement.style.fontSize = titleInfo.fontSize;  // 글 크기 설정
+                                    titleElement.style.fontWeight = titleInfo.fontWeight;  // fontWeight 설정 (ex: extra-bold 또는 normal)
+                                    titleElement.style.color = titleInfo.color;  // 글 색상 설정
+                                
+                                    // 위치 설정
+                                    titleElement.style.left = titleInfo.left + "px";  // 왼쪽 위치 설정
+                                    titleElement.style.top = titleInfo.top + "px";    // 위쪽 위치 설정
+                                
+                                    // 제목을 #table-container2의 첫 번째 자식으로 추가
+                                    container2.insertBefore(titleElement, container2.firstChild);
+                                });                               
                                 
                         
                         
@@ -1048,7 +1163,7 @@ map.on('load', () => {
 
                     // Highlight the clicked polygon
                     map.setFilter('geojson-outline', ['==', 'id', d.properties.id]); // Assuming each polygon has a unique 'id'
-                    map.setPaintProperty('geojson-outline', 'line-opacity', 1);
+                    map.setPaintProperty('geojson-outline', 'line-opacity', .7);
 
                     // Set clicked triangle as selected
                     selectedTriangle = d3.select(this);
@@ -1068,19 +1183,23 @@ map.on('load', () => {
                         .append("div")
                         .attr("class", "popup")
                         .style("position", "absolute")
-                        .style("background-color", "white")
+                        .style("background-color", "rgba(255,255,255,0.7")
                         .style("border", "1px solid black")
                         .style("padding", "10px")
-                        .style("border-radius", "5px")
+                        .style("border-radius", "20px")
                         .style("box-shadow", "0px 4px 6px rgba(0, 0, 0, 0.1)")
                         .style("top", `${y - 50}px`)
                         .style("left", `${x + 20}px`);
 
                     popup.html(`
-                        <strong>Census Tract:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Geographic Area Name"]}<br>
-                        <strong>Median Income:</strong> $${d.properties["Re_Income_New_York_Specific_Counties_Estimate!!Households!!Median income (dollars)"]}<br>
-                        <strong>Delivery Fee Unit:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Units"]}<br>
-                        <strong>Destict:</strong> ${d.properties["Destrict"]}
+                        <strong>Census Tarct:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Geographic Area Name"]
+                        .replace(/^Census Tract /, 'CT ') // "Census Tract " 제거
+                        .replace(/;/g, ',')}<br> 
+                        <strong>Median Income:</strong> $${parseInt(d.properties["Re_Income_New_York_Specific_Counties_Estimate!!Households!!Median income (dollars)"])
+                        .toLocaleString()}<br> <!-- 천 단위 콤마 추가 -->
+                        <strong>Delivery Fee Unit:</strong> ${parseFloat(d.properties["Re_Income_New_York_Specific_Counties_Units"])
+                        .toFixed(3)}<br> <!-- 소수점 3자리까지만 표시 -->
+                        <strong>District:</strong> ${d.properties["Destrict"]}
                     `);
                 });
 
@@ -1115,7 +1234,127 @@ map.on('load', () => {
             });
             
          
+            function heatmap(map) {
+                // Adding Aged_65 GeoJSON data as a source
+                map.addSource('aged-65', {
+                    type: 'geojson',
+                    data: 'Aged_65.geojson' // GeoJSON data file path
+                });
+            
+                // Adding Disability GeoJSON data as a source
+                map.addSource('disability', {
+                    type: 'geojson',
+                    data: 'Disability.geojson' // GeoJSON data file path
+                });
+            
+                // Adding Work_50 GeoJSON data as a source
+                map.addSource('work-50', {
+                    type: 'geojson',
+                    data: 'Work_50.geojson' // GeoJSON data file path
+                });
+            
+                map.addLayer({
+                    id: 'heatmap-work-50',
+                    type: 'heatmap',
+                    source: 'work-50',
+                    maxzoom: 20,
+                    paint: {
+                        'heatmap-color': [
+                            'interpolate', ['linear'], ['heatmap-density'],
+                            0, 'rgba(32, 0, 0, 0)',
+                            0.1, 'rgba(32, 235, 150, 0.8)', // Blue green
+                            0.3, 'rgba(32, 235, 150, 0.5)', 
+                            0.9, 'rgba(32, 235, 150, 0.2)'
+                        ],
+                        'heatmap-weight': 0.1,
+                        'heatmap-intensity': 0.3,
+                        'heatmap-opacity': 0.7,
+                        'heatmap-radius' : 10,
+                        
+                    }
+                });
+                // Adding Heatmap layers for each source with different color schemes
+                map.addLayer({
+                    id: 'heatmap-aged-65',
+                    type: 'heatmap',
+                    source: 'aged-65',
+                    maxzoom: 20,
+                    paint: {
+                        'heatmap-color': [
+                            'interpolate', ['linear'], ['heatmap-density'],
+                            0, 'rgba(255, 255, 0, 0)', // Yellow
+                            0.1, 'rgba(255, 255, 0, 0.8)', 
+                            0.3, 'rgba(255, 255, 0, 0.5)',
+                            0.9, 'rgba(255, 255, 0, 0.2)'
+                        ],
+                        'heatmap-weight': 0.1,
+                        'heatmap-intensity': 0.3,
+                        'heatmap-opacity': 0.7,
+                        'heatmap-radius' : 10,
+                    }
+                });
+            
+                map.addLayer({
+                    id: 'heatmap-disability',
+                    type: 'heatmap',
+                    source: 'disability',
+                    maxzoom: 20,
+                    paint: {
+                        'heatmap-color': [
+                            'interpolate', ['linear'], ['heatmap-density'],
+                            0, 'rgba(255, 0, 0, 0)',
+                            0.1, 'rgba(255, 0, 0, 0.8)', // Red
+                            0.3, 'rgba(219, 0, 0, 0.5)', 
+                            0.9, 'rgba(255, 0, 0, 0.2)'
+                        ],
+                        'heatmap-weight': 0.1,
+                        'heatmap-intensity': 0.3,
+                        'heatmap-opacity': 0.7,
+                        'heatmap-radius' : 10,
+                        
 
+                    }
+                });
+              
+                
+            }
+            function showHeatmapControls() {
+                document.getElementById('heatmap-controls').style.display = 'block';
+            }
+            function hideHeatmapControls() {
+                document.getElementById('heatmap-controls').style.display = 'none';
+            }
+            function toggleHeatmapLayer(map, layerId) {
+                const visibility = map.getLayoutProperty(layerId, 'visibility');
+                map.setLayoutProperty(layerId, 'visibility', visibility === 'visible' ? 'none' : 'visible');
+            }
+            function hideHeatmap(map) {
+                map.setLayoutProperty('heatmap-aged-65', 'visibility', 'none');
+                map.setLayoutProperty('heatmap-disability', 'visibility', 'none');
+                map.setLayoutProperty('heatmap-work-50', 'visibility', 'none');
+                hideHeatmapControls(); // 버튼 컨트롤 숨기기
+            }
+            function showHeatmap(map) {
+                map.setLayoutProperty('heatmap-aged-65', 'visibility', 'visible');
+                map.setLayoutProperty('heatmap-disability', 'visibility', 'visible');
+                map.setLayoutProperty('heatmap-work-50', 'visibility', 'visible');
+                showHeatmapControls(); // 버튼 컨트롤 보이기
+            }
+            // 버튼 클릭 이벤트 등록
+            document.getElementById('btn-aged-65').addEventListener('click', () => {
+                toggleHeatmapLayer(map, 'heatmap-aged-65');
+            });
+
+            document.getElementById('btn-disability').addEventListener('click', () => {
+                toggleHeatmapLayer(map, 'heatmap-disability');
+            });
+
+            document.getElementById('btn-work-50').addEventListener('click', () => {
+                toggleHeatmapLayer(map, 'heatmap-work-50');
+            });
+            
+            heatmap(map);
+            hideHeatmap(map);
             const path = d3.geoPath();  // No need to redefine this inside the listener
 let isBoroughActive = false;
             
@@ -1170,14 +1409,19 @@ let isBoroughActive = false;
      // Remove D3 chart from the container
      const chartContainer = "#table-container"; // 사용한 컨테이너와 동일하게 설정
      d3.select(chartContainer).selectAll("*").remove(); // 차트 제거
-}
+     hideHeatmap(map);
+    }
+document.getElementById('table-container2').style.display = 'none';  
 
 
 
 document.getElementById("btn0").addEventListener("click", function() {
         hideAllContents();
-        document.getElementById("content-title").textContent = "Cost Burden and Social Discomfort of Delivery Services";
-        document.getElementById("content-text").textContent = "This section will display information about delivery fees.";defineAmazonLayer();
+        document.getElementById("content-title").innerHTML = 
+    '<span style="color: black;">Cost Burden</span> and <span style="color: black;">Social Discomfort</span><br> of Delivery Services';
+        document.getElementById("content-text2").textContent = "The delivery system has become an almost essential service in modern society, and especially in large cities like New York, it is hard to find areas where delivery services are unavailable. However, certain individuals may face difficulties accessing these delivery services depending on their circumstances. This article will explore two main issues: the burden of delivery fees and the inability to receive deliveries due to specific situations.";
+        document.getElementById("content-text").textContent = "Delivery services are available in various forms, including packages, groceries, and meals, and these services often come with additional charges on top of the cost of the goods. While these additional costs are not a major burden for individuals with average incomes, they can be a significant financial strain for some, particularly those facing income inequality, leading to the inability to use delivery services. The average annual cost for using delivery services is $130, with a monthly average of about $13."
+        defineAmazonLayer();
         defineAmazonLayer();
         defineTraderLayer();
         defineWalmartLayer();
@@ -1186,42 +1430,47 @@ document.getElementById("btn0").addEventListener("click", function() {
         const container = "#table-container";
         createBarChart(rawData, container);
         document.getElementById('table-container2').style.display = 'none';  
-        document.getElementById('table-container3').style.display = 'none';  
-         
-
+        document.getElementById('delivery_fee_explain').style.display = 'none'; 
+        document.getElementById('content-text2').style.display = 'block';  
     });
 // Button click event listeners for changing content
 document.getElementById("btn1").addEventListener("click", function() {
     hideAllContents();
-    document.getElementById("content-title").textContent = "Delivery Fee";
-    document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
+    document.getElementById("content-little-title").textContent = "Cost Burden and Social Discomfort of Delivery Services";
+    document.getElementById("content-title").innerHTML = '<span style="color: black;">Delivery Fee Burden</span> by House-income';
+    document.getElementById("content-text").textContent = "When examining the burden of delivery fees in relation to median income by Census Tract in New York City, most people experience a burden level of about 2. However, there are those who feel the burden is more than five times greater compared to the highest income earners, which can make using delivery services difficult.";
     d3.select(".overlay").style("display", "block");
     document.getElementById('table-container2').style.display = 'none';  
-    document.getElementById('table-container3').style.display = 'none'; 
     const container = "#table-container";
     createLineChart(rawData2, container);
+    document.getElementById('delivery_fee_explain').style.display = 'block';
+     document.getElementById('content-text2').style.display = 'none';  
 
 });
 document.getElementById("btn3").addEventListener("click", function() {
     hideAllContents();
-    document.getElementById("content-title").textContent = "Package Theft";
-    document.getElementById("content-text").textContent = "This section will display information about package theft.";
-    document.getElementById('table-container2').style.display = 'block';    
-    document.getElementById('table-container3').style.display = 'block';  
+    document.getElementById("content-little-title").textContent = "Cost Burden and Social Discomfort of Delivery Services";
+    document.getElementById("content-title").innerHTML = '<span style="color: black;">Package Theft</span> and <span style="color: black;">Inconvenient situations</span><br> for receiving deliveries';
+    document.getElementById("content-text").textContent = "Additionally, many Americans have had experiences with the theft of delivered goods, which causes them to hesitate in using delivery services. To prevent theft, most people track the delivery process or opt to receive the packages in person. However, certain groups face challenges in using these methods. For example, elderly individuals or those with disabilities who have difficulty moving can only receive deliveries in person when a caregiver is present. People with long working hours who return home late at night also face difficulties in receiving deliveries in person. These challenges highlight the accessibility limitations of delivery services, which can further exacerbate social inequality.";
+    document.getElementById('table-container2').style.display = 'flex';    
     const container = "#table-container";
     const container2 = "#table-container2";
-    const container3 = "#table-container3";
-    createBarChart_Package(rawData3, container);  
-    createBarChart_Package2(rawData4, container2);   
-    createBarChart_Package3(rawData5, container3);   
+    createBarChart_Package(rawData3, "#chart1");
+    createBarChart_Package2(rawData4, "#chart2");  
+    createBarChart_Package3(rawData5, container);   
+    showHeatmap(map);
+    document.getElementById('delivery_fee_explain').style.display = 'none'; 
+    document.getElementById('content-text2').style.display = 'none';  
     });
 document.getElementById("btn2").addEventListener("click", function() {
     hideAllContents();
-    document.getElementById("content-title").textContent = "Delivery Fee";
-    document.getElementById("content-text").textContent = "This section will display information about delivery fees.";
+    document.getElementById("content-little-title").textContent = "Cost Burden and Social Discomfort of Delivery Services";
+    document.getElementById("content-title").innerHTML = '<span style="color: black;">Delivery Usage</span> by Borough';
+    document.getElementById("content-text").textContent = "Quantifying the burden of delivery fees is challenging, but examining the delivery rate index by borough reveals significant differences. Manhattan, with a relatively higher income, shows a higher delivery rate, while the boroughs of Bronx, Queens, and Brooklyn, which have lower average incomes, exhibit lower delivery rates.";
     d3.select(".overlay").style("display", "block");
-    document.getElementById('table-container2').style.display = 'none'; 
-    document.getElementById('table-container3').style.display = 'none';   
+    document.getElementById('table-container2').style.display = 'none';
+    document.getElementById('delivery_fee_explain').style.display = 'none';    
+    document.getElementById('content-text2').style.display = 'none';  
     isBoroughActive = !isBoroughActive;
     
     // Update triangle colors based on the `Destrict` property
