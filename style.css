@@ -1,4 +1,69 @@
-/* style.css */
+/* 화면 전체를 차지하는 PNG 이미지 스타일 */
+.overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);  /* 배경을 어둡게 */
+    z-index: 1000;  /* 다른 요소들보다 위에 위치하게 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.overlay2-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;  /* 이미지가 뒤로 가게 설정 */
+}
+
+/* 텍스트 스타일 */
+.overlay2-text {
+    z-index: 1;
+    color: rgb(190, 190, 190);
+    font-family: Arial, sans-serif;
+}
+
+/* 제목 및 설명 스타일 */
+.overlay2-text h1 {
+    font-size: 3em;
+}
+.overlay2-text h1 strong {
+    color: #ffffff; /* 검정색 */
+}
+.overlay2-text h2 {
+    font-size: 2em;
+}
+
+.overlay2-text p {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+/* Search 버튼 스타일 */
+.search-btn {
+    background-color: rgb(190, 190, 190,0.9);
+    color: #185f8f;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 30px;
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+}
+
+.search-btn:hover {
+    background-color: #ffffff;
+}
 
 /* Reset body margin and padding */
 body {

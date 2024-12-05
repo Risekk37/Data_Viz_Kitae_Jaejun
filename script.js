@@ -1,3 +1,7 @@
+document.getElementById("search-btn").addEventListener("click", function() {
+    // PNG 이미지와 텍스트를 아예 삭제
+    document.getElementById("overlay2").remove();
+});
 // JavaScript to toggle sidebar visibility
 document.getElementById("toggle-btn").addEventListener("click", function() {
     const sidebar = document.getElementById("sidebar");
@@ -26,17 +30,22 @@ document.getElementById("menu-btn").addEventListener("click", function () {
     }
 });
 
-// 버튼 클릭 시 동작 추가 (예: btn0을 기본 활성화 상태로 설정)
-document.getElementById("btn0").addEventListener("click", function () {
-    console.log("Project button clicked");
-    // 원하는 동작 추가
+// btn0부터 btn4까지 버튼 클릭 시 메뉴 팝업 닫기
+const buttons = ["btn0", "btn1", "btn2", "btn3"];
+buttons.forEach(buttonId => {
+    document.getElementById(buttonId).addEventListener("click", function () {
+        const menuPopup = document.getElementById("menu-popup");
+        menuPopup.classList.add("hidden");
+        menuPopup.style.display = "none"; // 메뉴 팝업 닫기
+    });
 });
+
 
 // Initialize the MapLibre map
 const map = new maplibregl.Map({
     container: 'map', // The id of the HTML element to use for the map
     style: 'positron_D.json', // Path to the Maputnik style JSON
-    center: [-75.135242, 40.730610], // Initial center [lng, lat]
+    center: [-74.235242, 40.730610], // Initial center [lng, lat]
     zoom: 10, // Initial zoom level
     minZoom: 9.5, // Minimum zoom level
     maxZoom: 13, // Maximum zoom level
@@ -1471,6 +1480,17 @@ document.getElementById("btn2").addEventListener("click", function() {
     document.getElementById('table-container2').style.display = 'none';
     document.getElementById('delivery_fee_explain').style.display = 'none';    
     document.getElementById('content-text2').style.display = 'none';  
+     // 이미지 추가
+     const container = document.getElementById("table-container");
+     container.style.display = "block"; // 컨테이너 보이게 설정
+     container.innerHTML = ""; // 이전 내용 지우기
+ 
+     const img = document.createElement("img");
+     img.src = "Borough_Delivery_Usage.png"; // 여기에 이미지 경로 설정
+     img.style.width = "100%"; // 필요에 따라 스타일 조정
+     img.style.height = "auto";
+ 
+     container.appendChild(img);
     isBoroughActive = !isBoroughActive;
     
     // Update triangle colors based on the `Destrict` property
