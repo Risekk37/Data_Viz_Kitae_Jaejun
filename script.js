@@ -1,24 +1,19 @@
 document.getElementById("search-btn").addEventListener("click", function() {
-    // PNG 이미지와 텍스트를 아예 삭제
     document.getElementById("overlay2").remove();
 });
-// JavaScript to toggle sidebar visibility
+
 document.getElementById("toggle-btn").addEventListener("click", function() {
     const sidebar = document.getElementById("sidebar");
 
-    // Toggle the 'hidden' class on sidebar
     sidebar.classList.toggle("hidden");
 
-    // Check if sidebar is hidden or not
     if (sidebar.classList.contains("hidden")) {
-        // When sidebar is hidden, move the button to the left
         this.style.left = '0';
     } else {
-        // When sidebar is open, move the button to the right side of the sidebar
         this.style.left = 'calc(40% + 40px)';
     }
 });
-// 메뉴 버튼 클릭 시 팝업 열기/닫기
+
 document.getElementById("menu-btn").addEventListener("click", function () {
     const menuPopup = document.getElementById("menu-popup");
     if (menuPopup.classList.contains("hidden")) {
@@ -30,37 +25,32 @@ document.getElementById("menu-btn").addEventListener("click", function () {
     }
 });
 
-// btn0부터 btn4까지 버튼 클릭 시 메뉴 팝업 닫기
 const buttons = ["btn0", "btn1", "btn2", "btn3"];
 buttons.forEach(buttonId => {
     document.getElementById(buttonId).addEventListener("click", function () {
         const menuPopup = document.getElementById("menu-popup");
         menuPopup.classList.add("hidden");
-        menuPopup.style.display = "none"; // 메뉴 팝업 닫기
+        menuPopup.style.display = "none"; 
     });
 });
 
-
-// Initialize the MapLibre map
 const map = new maplibregl.Map({
-    container: 'map', // The id of the HTML element to use for the map
-    style: 'positron_D.json', // Path to the Maputnik style JSON
-    center: [-74.235242, 40.730610], // Initial center [lng, lat]
-    zoom: 10, // Initial zoom level
-    minZoom: 9.5, // Minimum zoom level
-    maxZoom: 13, // Maximum zoom level
+    container: 'map', 
+    style: 'positron_D.json', 
+    center: [-74.235242, 40.730610], 
+    zoom: 10, 
+    minZoom: 9.5, 
+    maxZoom: 13, 
     maxBounds: [
-        [-74.835242, 40.230610], // Southwest corner [longitude, latitude]
-        [-73.035242, 41.230610] // Northeast corner [longitude, latitude]
-    ] // Restrict map to the boundaries of New York City
+        [-74.835242, 40.230610], 
+        [-73.035242, 41.230610] 
+    ] 
 });
 
 map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
-
-// Helper function to compute centroids of polygons (MultiPolygon support)
 function computeCentroid(polygon) {
-    const coords = polygon.geometry.coordinates[0][0]; // Use first ring of first polygon
+    const coords = polygon.geometry.coordinates[0][0]; 
     const n = coords.length;
 
     let x = 0, y = 0;
@@ -70,9 +60,8 @@ function computeCentroid(polygon) {
     });
     return [x / n, y / n];
 }
-// Function to define and add the Amazon layer to the map
 function defineAmazonLayer() {
-    fetch('Amazon_Location.geojson')
+    fetch('Data/Amazon_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
             map.addSource('Amazon', {
@@ -80,24 +69,23 @@ function defineAmazonLayer() {
                 data: geojsonData
             });
 
-            // Add a base fill layer (invisible) for Amazon location
             map.addLayer({
                 id: 'Amazon_Loc',
                 type: 'circle',
                 source: 'Amazon',
                 paint: {
-                    'circle-radius': 1,            // Circle size
-                    'circle-color': 'rgba(0, 0, 0, 1)',  // Transparent fill
-                    'circle-stroke-width': 2,        // Increased border width for visibility
-                    'circle-stroke-color': '#ec5d5d',  // Set border color to red
+                    'circle-radius': 1,         
+                    'circle-color': 'rgba(0, 0, 0, 1)',  
+                    'circle-stroke-width': 2,        
+                    'circle-stroke-color': '#ec5d5d', 
                     'circle-opacity': 0.7,
-                    'circle-stroke-opacity': 0.7      // Full opacity for border
+                    'circle-stroke-opacity': 0.7    
                 }
             });
         });
 }
 function defineTraderLayer() {
-    fetch('Trader_Location.geojson')
+    fetch('Data/Trader_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
             map.addSource('Trader', {
@@ -105,24 +93,23 @@ function defineTraderLayer() {
                 data: geojsonData
             });
 
-            // Add a base fill layer (invisible) for Amazon location
             map.addLayer({
                 id: 'Trader_Loc',
                 type: 'circle',
                 source: 'Trader',
                 paint: {
-                    'circle-radius': 1,            // Circle size
-                    'circle-color': 'rgba(0, 0, 0, 1)',  // Transparent fill
-                    'circle-stroke-width': 2,        // Increased border width for visibility
-                    'circle-stroke-color': '#e98fbc',  // Set border color to red
+                    'circle-radius': 1,           
+                    'circle-color': 'rgba(0, 0, 0, 1)',  
+                    'circle-stroke-width': 2,       
+                    'circle-stroke-color': '#e98fbc',  
                     'circle-opacity': 0.7,
-                    'circle-stroke-opacity': 0.7      // Full opacity for border
+                    'circle-stroke-opacity': 0.7     
                 }
             });
         });
 }
 function defineWalmartLayer() {
-    fetch('Walmart_Location.geojson')
+    fetch('Data/Walmart_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
             map.addSource('Walmart', {
@@ -130,24 +117,23 @@ function defineWalmartLayer() {
                 data: geojsonData
             });
 
-            // Add a base fill layer (invisible) for Amazon location
             map.addLayer({
                 id: 'Walmart_Loc',
                 type: 'circle',
                 source: 'Walmart',
                 paint: {
-                    'circle-radius': 1,            // Circle size
-                    'circle-color': 'rgba(0, 0, 0, 1)',  // Transparent fill
-                    'circle-stroke-width': 2,        // Increased border width for visibility
-                    'circle-stroke-color': '#ffd461',  // Set border color to red
+                    'circle-radius': 1,        
+                    'circle-color': 'rgba(0, 0, 0, 1)', 
+                    'circle-stroke-width': 2,       
+                    'circle-stroke-color': '#ffd461', 
                     'circle-opacity': 0.7,
-                    'circle-stroke-opacity': 0.7      // Full opacity for border
+                    'circle-stroke-opacity': 0.7    
                 }
             });
         });
 }
 function defineWholeLayer() {
-    fetch('Whole_Food_Location.geojson')
+    fetch('Data/Whole_Food_Location.geojson')
         .then(response => response.json())
         .then(geojsonData => {
             map.addSource('Whole_Food', {
@@ -155,38 +141,35 @@ function defineWholeLayer() {
                 data: geojsonData
             });
 
-            // Add a base fill layer (invisible) for Amazon location
             map.addLayer({
                 id: 'Whole_Loc',
                 type: 'circle',
                 source: 'Whole_Food',
                 paint: {
-                    'circle-radius': 1,            // Circle size
-                    'circle-color': 'rgba(0, 0, 1, 1)',  // Transparent fill
-                    'circle-stroke-width': 2,        // Increased border width for visibility
-                    'circle-stroke-color': '#3dcba4',  // Set border color to red
+                    'circle-radius': 1,         
+                    'circle-color': 'rgba(0, 0, 1, 1)',  
+                    'circle-stroke-width': 2,      
+                    'circle-stroke-color': '#3dcba4', 
                     'circle-opacity': 0.7,
-                    'circle-stroke-opacity': 0.7      // Full opacity for border
+                    'circle-stroke-opacity': 0.7   
                 }
             });
         });
 }
+
 defineAmazonLayer();
 defineTraderLayer();
 defineWalmartLayer();
 defineWholeLayer();
 
 function definePackageLayer() {
-    // 이미지 추가
-    map.loadImage('package3.png', (error, image) => {
+    map.loadImage('Pic/package3.png', (error, image) => {
         if (error) throw error;
 
-        // 이미지 등록
         if (!map.hasImage('package-icon')) {
             map.addImage('package-icon', image);
         }
 
-        // 데이터 소스 추가
         map.addSource('package-source', {
             type: 'geojson',
             data: {
@@ -196,93 +179,91 @@ function definePackageLayer() {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-74.04172287518699, 40.74969215442544], // 첫 번째 위치
+                            coordinates: [-74.04172287518699, 40.74969215442544], 
                         },
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-74.01219711826798, 40.797921437587966], // 두 번째 위치
+                            coordinates: [-74.01219711826798, 40.797921437587966],
                         },
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-73.94827724606394, 40.689797835365205], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-73.94827724606394, 40.689797835365205], 
                         }, 
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-73.97785244138562, 40.78405099270973], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-73.97785244138562, 40.78405099270973], 
                         },  
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-73.89987784823322, 40.82074299748267], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-73.89987784823322, 40.82074299748267], 
                         },   
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-73.91080380585716, 40.89295396819356], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-73.91080380585716, 40.89295396819356], 
                         },   
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-73.99478754903049, 40.629954952226534], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-73.99478754903049, 40.629954952226534], 
                         },    
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-74.10502365040031, 40.62701123818052], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-74.10502365040031, 40.62701123818052], 
                         },    
                     },
                     {
                         type: 'Feature',
                         geometry: {
                             type: 'Point',
-                            coordinates: [-74.16558237954096,40.549271012607555], // 세 번째 위치 (예: 엠파이어 스테이트 빌딩)
+                            coordinates: [-74.16558237954096,40.549271012607555], 
                         },     
                     },
                 ],
             }, 
         });
 
-        // 레이어 추가
         map.addLayer({
             id: 'package-layer',
             type: 'symbol',
             source: 'package-source',
             layout: {
                 'icon-image': 'package-icon',
-                'icon-size': 0.03, // 기본 크기
+                'icon-size': 0.03,
             },
         });
 
         packageLayerVisible = true;
 
-        // 줌 이벤트로 크기 조정
         map.on('zoom', () => {
             const zoom = map.getZoom();
-            const size = zoom / 300; // 줌 비율에 따라 크기 조정
+            const size = zoom / 300; 
             map.setLayoutProperty('package-layer', 'icon-size', size);
         });
     });
 }
 
 definePackageLayer();
-                       // CSV 데이터를 직접 정의
+
                        const rawData = [
                         { Unit: "Amazon", Year: "139.00", Month: "14.99", Order: "4.99" },
                         { Unit: "Amazon_Fresh", Year: "139.00", Month: "14.99", Order: "9.95" },
@@ -374,24 +355,23 @@ definePackageLayer();
                             .attr("width", x1.bandwidth())
                             .attr("height", d => height - y(d.value))
                             .attr("fill", d => colors[d.key]);
-                    // X축 라벨 추가
+
                     svg.append("text")
                     .attr("x", width / 2)
-                    .attr("y", height + 60) // X축 아래 여백 추가
+                    .attr("y", height + 60) 
                     .attr("text-anchor", "middle")
                     .attr("font-size", "12px")
                     .text("Delivery Service");
                     
                     svg.append("text")
                     .attr("class", "y-axis-label")
-                    .attr("transform", "rotate(-90)") // -90도 회전
-                    .attr("x", -height / 2) // 중앙 정렬
-                    .attr("y", -margin.left + 10) // 여백 조정
-                    .attr("text-anchor", "middle") // 텍스트 정렬
+                    .attr("transform", "rotate(-90)") 
+                    .attr("x", -height / 2) 
+                    .attr("y", -margin.left + 10) 
+                    .attr("text-anchor", "middle") 
                     .attr("font-size", "12px")
                     .text("Service Fee");
-                    
-                    // Tooltip 추가
+
                     const tooltip = svg.append("g")
                         .style("opacity", 0)
                         .attr("class", "tooltip");
@@ -410,13 +390,10 @@ definePackageLayer();
                     bars.selectAll("rect")
                         .on("mouseover", function(event, d) {
                             tooltip.style("opacity", 1);
-                    
-                            // Tooltip에 표시할 내용
                             tooltip.select("text").text(`${d.key}: $${d.value}`);
                         })
                         .on("mousemove", function(event) {
                             tooltip
-                                // Tooltip을 마우스 오른쪽에 10px 정도 떨어지도록 설정
                                 .attr("transform", `translate(${event.pageX -90}, ${event.pageY - 280})`);
                         })
                         .on("mouseout", function() {
@@ -461,80 +438,70 @@ definePackageLayer();
                         { x: 10, y: 16 }
                     ];
                     function createLineChart(rawData2, container) {
-                        // 컨테이너 크기 설정
                         const margin = { top: 20, right: 30, bottom: 40, left: 60 };
                         const width = 640 - margin.left - margin.right;
                         const height = 450 - margin.top - margin.bottom;
-                    
-                        // SVG 요소 추가
                         const svg = d3.select(container)
                             .append("svg")
                             .attr("width", width + margin.left + margin.right)
                             .attr("height", height + margin.top + margin.bottom)
                             .append("g")
                             .attr("transform", `translate(${margin.left},${margin.top})`);
-                    
-                        // X, Y 스케일 설정
                         const x = d3.scaleLinear()
-                            .domain([1, d3.max(rawData2, d => d.x)]) // X축은 1부터 최대값까지
+                            .domain([1, d3.max(rawData2, d => d.x)]) 
                             .range([0, width]);
                     
                         const y = d3.scaleLinear()
-                            .domain([0, d3.max(rawData2, d => d.y)])  // Y축 최대값은 데이터에서 가장 큰 값
+                            .domain([0, d3.max(rawData2, d => d.y)]) 
                             .range([height, 0]);
-                    
-                        // X축, Y축 추가
+
                         svg.append("g")
                             .attr("transform", `translate(0,${height})`)
                             .call(d3.axisBottom(x));
                     
                         svg.append("g")
                             .call(d3.axisLeft(y));
-                    
-                        // X축 라벨 추가
+
                         svg.append("text")
                         .attr("x", width / 2)
-                        .attr("y", height + 35) // X축 아래 여백 추가
+                        .attr("y", height + 35)
                         .attr("text-anchor", "middle")
                         .attr("font-size", "12px")
                         .text("Unit");
                     
                         svg.append("text")
                         .attr("class", "y-axis-label")
-                        .attr("transform", "rotate(-90)") // -90도 회전
-                        .attr("x", -height / 2) // 중앙 정렬
-                        .attr("y", -margin.left + 10) // 여백 조정
-                        .attr("text-anchor", "middle") // 텍스트 정렬
+                        .attr("transform", "rotate(-90)") 
+                        .attr("x", -height / 2) 
+                        .attr("y", -margin.left + 10) 
+                        .attr("text-anchor", "middle") 
                         .attr("font-size", "12px")
                         .text("Borough number");
-                    
-                        // 선분 그리기
+
                         const line = d3.line()
                             .x(d => x(d.x))
                             .y(d => y(d.y));
                     
                         svg.append("path")
-                            .data([rawData2])  // rawData2로 변경
+                            .data([rawData2]) 
                             .attr("class", "line")
                             .attr("d", line)
                             .attr("fill", "none")
                             .attr("stroke", "orange")
                             .attr("stroke-width", 2);
-                    
-                        // 선분 밑에 빨간색 색을 채우기 (y=0 부터 선분까지 채우기)
+
                         const area = d3.area()
                             .x(d => x(d.x))
-                            .y0(height)  // y0를 0 (x축)으로 설정
-                            .y1(d => y(d.y));  // 선분의 y값을 채우기
+                            .y0(height)  
+                            .y1(d => y(d.y)); 
                     
                         svg.append("path")
-                            .data([rawData2])  // rawData2로 변경
+                            .data([rawData2])  
                             .attr("class", "area")
                             .attr("d", area)
-                            .attr("fill", "url(#orange-gradient)")  // 그라데이션을 채우기 위해 url을 사용
-                            .attr("fill-opacity", 1);  // 투명도 100%
-                    
-                        // 그라데이션 정의
+                            .attr("fill", "url(#orange-gradient)") 
+                            .attr("fill-opacity", 1); 
+
                         const gradient = svg.append("defs")
                             .append("linearGradient")
                             .attr("id", "orange-gradient")
@@ -545,41 +512,78 @@ definePackageLayer();
                     
                         gradient.append("stop")
                             .attr("offset", "0%")
-                            .attr("stop-color", "white")  // x=0일 때는 흰색(투명도)
-                            .attr("stop-opacity", 0);  // x=0일 때는 완전히 투명
+                            .attr("stop-color", "white")  
+                            .attr("stop-opacity", 0);  
                     
                         gradient.append("stop")
                             .attr("offset", "100%")
-                            .attr("stop-color", "orange")  // x가 커질수록 빨간색
-                            .attr("stop-opacity", 1);  // x가 최대일 때는 빨간색이 100%
-                    
-                        // 각 데이터 포인트에서 x축부터 y값까지 세로 점선 추가
+                            .attr("stop-color", "orange")  
+                            .attr("stop-opacity", 1); 
+
                         svg.selectAll(".vertical-line")
                             .data(rawData2)
                             .enter()
                             .append("line")
                             .attr("class", "vertical-line")
                             .attr("x1", d => x(d.x))
-                            .attr("y1", height)  // x축 위치
+                            .attr("y1", height) 
                             .attr("x2", d => x(d.x))
-                            .attr("y2", d => y(d.y))  // 각 y값까지 세로선 그리기
+                            .attr("y2", d => y(d.y))  
                             .attr("stroke", "red")
-                            .attr("stroke-dasharray", "1 4")  // 점선 스타일
+                            .attr("stroke-dasharray", "1 4") 
                             .attr("stroke-width", 1)
-                            .attr("stroke-opacity", 0.5);  // 점선 투명도 50%
+                            .attr("stroke-opacity", 0.5); 
                             
                             svg.append("text")
-                            .attr("x", width) // 오른쪽 여백
-                            .attr("y", 10) // 위쪽 여백
-                            .attr("text-anchor", "end") // 오른쪽 정렬
+                            .attr("x", width) 
+                            .attr("y", 60)
+                            .attr("text-anchor", "end")
                             .attr("font-size", "14px")
-                            .style("font-weight", "bold") // 굵게 설정
-                            .style("font-style", "italic") // 이탤릭 설정
-                            .style("fill", "rgba(0, 45, 143, 0.7)") // 색상 설정
-                            .text("Unit Number more than 4: 31.7%"); // 표시할 텍스트
-                         // 툴팁 추가
+                            .style("font-weight", "bold") 
+                            .style("font-style", "italic") 
+                            .style("fill", "rgba(0, 45, 143, 0.7)") 
+                            .text("Unit Number more than 4: 31.7%"); 
+                            
+                            svg.append("text")
+                            .attr("x",300) 
+                            .attr("y", 20) 
+                            .attr("text-anchor", "end") 
+                            .attr("font-size", "14px")
+                            .style("font-weight", "bold")
+                            .style("font-style", "italic") 
+                            .style("fill", "rgba(0, 45, 143, 0.7)") 
+                            .text("Delivery Fee Burden:"); 
+                            
+                            svg.append("text")
+                            .attr("x", width-70) 
+                            .attr("y", 10)
+                            .attr("text-anchor", "end")
+                            .attr("font-size", "14px")
+                            .style("font-weight", "bold") 
+                            .style("font-style", "italic") 
+                            .style("fill", "rgba(0, 45, 143, 0.7)") 
+                            .text("Delivery Fee AVG"); 
+                            
+                            svg.append("text")
+                            .attr("x", width) 
+                            .attr("y", 30) 
+                            .attr("text-anchor", "end") 
+                            .attr("font-size", "14px")
+                            .style("font-weight", "bold") 
+                            .style("font-style", "italic") 
+                            .style("fill", "rgba(0, 45, 143, 0.7)") 
+                            .text("(Household-income/Highest-income)"); 
+                            
+                            svg.append("line")
+                            .attr("x1", width - 220)  
+                            .attr("y1", 17)  
+                            .attr("x2", width - 20) 
+                            .attr("y2", 17)  
+                            .attr("stroke", "rgba(0, 45, 143, 0.7)")  
+                            .attr("stroke-width", 2);  
+                    
                             const tooltip = svg.append("g")
-                            .style("opacity", 0) // 초기에는 숨겨 놓기
+                            .style("opacity", 0) 
                             .attr("class", "tooltip");
 
                             tooltip.append("rect")
@@ -593,7 +597,6 @@ definePackageLayer();
                             .attr("y", 20)
                             .style("font-size", "12px");
 
-                        // 선분 위에 마우스를 올렸을 때 Y값을 표시하는 팝업 추가
                              svg.selectAll(".line-point")
                             .data(rawData2)
                             .enter()
@@ -606,18 +609,52 @@ definePackageLayer();
                             .attr("stroke", "transparent")
                             .attr("stroke-width", 1)
                             .on("mouseover", function(event, d) {
-                                tooltip.style("opacity", 1) // 툴팁 표시
-                                    .attr("transform", `translate(${x(d.x) - 160},${y(d.y) - 120})`) // 툴팁 위치 설정
+                                tooltip.style("opacity", 1) 
+                                    .attr("transform", `translate(${x(d.x) - 160},${y(d.y) - 120})`) 
                                     .select("text")
-                                    .text(`Borough number: ${d.y}`); // Y 값 표시
+                                    .text(`Borough number: ${d.y}`); 
                             })
                             .on("mousemove", function(event) {
-                                tooltip.attr("transform", `translate(${event.pageX -160},${event.pageY - 120})`); // 마우스 위치에 따라 툴팁 위치 업데이트
+                                tooltip.attr("transform", `translate(${event.pageX -160},${event.pageY - 120})`);
                             })
                             .on("mouseout", function() {
-                                tooltip.style("opacity", 0); // 툴팁 숨기기
+                                tooltip.style("opacity", 0); 
                             });
-                        }
+
+                            svg.selectAll(".triangle")
+                            .data(rawData2)
+                            .enter()
+                            .append("polygon")
+                            .attr("class", "triangle")
+                            .attr("points", d => {
+                                const centerX = x(d.x);
+                                const baseY = height;
+                                const heightY = height - d.x * 30; 
+                                return `${centerX - 10},${baseY} ${centerX + 10},${baseY} ${centerX},${heightY}`;
+                            })
+                            .attr("fill", "url(#triangle-gradient)")
+                            .attr("stroke", "orange") 
+                            .attr("stroke-width", 1.5)
+                            .attr("stroke-opacity", 0.6);
+
+                            const triangleGradient = svg.append("defs")
+                                .append("linearGradient")
+                                .attr("id", "triangle-gradient")
+                                .attr("x1", "0%")
+                                .attr("y1", "0%")
+                                .attr("x2", "0%")
+                                .attr("y2", "100%");
+
+                            triangleGradient.append("stop")
+                                .attr("offset", "0%")
+                                .attr("stop-color", "yellow")
+                                .attr("stop-opacity", 1);
+
+                            triangleGradient.append("stop")
+                                .attr("offset", "100%")
+                                .attr("stop-color", "white")
+                                .attr("stop-opacity", 0);
+                            }
                         
                         const rawData3 = [
                             ['Not at all', 13],
@@ -626,21 +663,15 @@ definePackageLayer();
                         ];
                         
                         function createBarChart_Package(rawData, container) {
-                            // Prepare the data for the bar chart
                             const data = rawData.map(d => ({
-                                category: d[0], // Category name
-                                value: d[1]     // Corresponding value
+                                category: d[0], 
+                                value: d[1] 
                             }));
-                        
-                            // Set up margins and dimensions for the chart
+
                             const margin = { top: 20, right: 10, bottom: 20, left: 30 };
                             const width = 320 - margin.left - margin.right;
                             const height = 140 - margin.top - margin.bottom;
-                        
-                            // Clear any previous content
                             d3.select(container).selectAll("*").remove();
-                        
-                            // Create an SVG element
                             const svg = d3
                                 .select(container)
                                 .append("svg")
@@ -648,43 +679,38 @@ definePackageLayer();
                                 .attr("height", height + margin.top + margin.bottom)
                                 .append("g")
                                 .attr("transform", `translate(${margin.left},${margin.top})`);
-                        
-                            // Set up the x and y scales
+
                             const x = d3.scaleLinear()
-                                .domain([0, d3.max(data, d => d.value)]) // Ensure that x-axis spans from 0 to the max value
+                                .domain([0, d3.max(data, d => d.value)])
                                 .range([0, width]);
                         
                             const y = d3.scaleBand()
                                 .domain(data.map(d => d.category))
                                 .range([0, height])
                                 .padding(0.1);
-                        
-                          
-                            // Add background bars for the chart (behind the actual bars)
+
                             svg.selectAll(".background-bar")
                             .data(data)
                             .enter()
                             .append("rect")
                             .attr("class", "background-bar")
-                            .attr("x", 0) // Background bars start from the left
-                            .attr("y", d => y(d.category)) // Position based on the category
-                            .attr("width", width) // Set the width to match the x-axis length
-                            .attr("height", y.bandwidth()) // Match the height of the categories
-                            .attr("fill", "#8D9AAC"); // Set a light gray color for the background
+                            .attr("x", 0) 
+                            .attr("y", d => y(d.category))
+                            .attr("width", width) 
+                            .attr("height", y.bandwidth()) 
+                            .attr("fill", "#8D9AAC");
 
-                            // Create bars for the chart
                             svg.selectAll(".bar")
                                 .data(data)
                                 .enter()
                                 .append("rect")
                                 .attr("class", "bar")
-                                .attr("x", 0) // Bars start from the left
-                                .attr("y", d => y(d.category)) // Position based on the category
-                                .attr("width", d => x(d.value)) // Set the bar width based on the value
-                                .attr("height", y.bandwidth()) // Reduce the bar height by 1/3
-                                .attr("fill", "#556580"); // Set bar color
-                        
-                            // Add tooltip functionality
+                                .attr("x", 0) 
+                                .attr("y", d => y(d.category))
+                                .attr("width", d => x(d.value)) 
+                                .attr("height", y.bandwidth()) 
+                                .attr("fill", "#556580");
+
                             const tooltip = svg.append("g")
                                 .style("opacity", 0)
                                 .attr("class", "tooltip");
@@ -707,54 +733,52 @@ definePackageLayer();
                                 .on("mouseout", function() {
                                     tooltip.style("opacity", 0);
                                 });
-                        
-                            // Add labels to the bars (category names)
+
                             svg.selectAll(".bar-label")
                                 .data(data)
                                 .enter()
                                 .append("text")
                                 .attr("class", "bar-label")
-                                .attr("x", 5) // Position the category label to the left of the bar
-                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                .attr("dy", ".35em") // Vertical alignment
-                                .attr("text-anchor", "start") // Align text to the left of the bar
+                                .attr("x", 5) 
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                .attr("dy", ".35em") 
+                                .attr("text-anchor", "start") 
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "10px")
                                 .text(d => d.category);
-                                
-                        
+
                                 svg.selectAll(".value-label")
                                 .data(data)
                                 .enter()
                                 .append("text")
                                 .attr("class", "value-label")
-                                .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
-                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                .attr("dy", ".35em") // Vertical alignment
-                                .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                .attr("x", width-5) 
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "end") 
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "12px")
-                                .text(d => `${d.value}%`); // Add "%" symbol to the value
+                                .text(d => `${d.value}%`); 
                                
                                 svg.selectAll(".value-label")
                                 .data(data)
                                 .enter()
                                 .append("text")
                                 .attr("class", "value-label")
-                                .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
-                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                .attr("dy", ".35em") // Vertical alignment
-                                .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                .attr("x", width-5)
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5)
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "end") 
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "12px")
-                                .text(d => `${d.value}%`); // Add "%" symbol to the value
-                             // Add title at the bottom-right of the SVG
+                                .text(d => `${d.value}%`);
+
                                 svg.append("text")
-                                .attr("x", width - 2) // Position it towards the right side of the chart
-                                .attr("y", height +15) // Position it at the bottom
-                                .attr("text-anchor", "end") // Align text to the right side
+                                .attr("x", width - 2) 
+                                .attr("y", height +15) 
+                                .attr("text-anchor", "end") 
                                 .style("font-size", "14px")
-                                .text("Package Theft Concerned"); // Title text    
+                                .text("Package Theft Concerned");   
                             }
                               
                         const rawData4 = [
@@ -766,21 +790,18 @@ definePackageLayer();
                         ];
                         
                         function createBarChart_Package2(rawData, container) {
-                            // Prepare the data for the bar chart
+
                             const data = rawData.map(d => ({
-                                category: d[0], // Category name
-                                value: d[1]     // Corresponding value
+                                category: d[0],
+                                value: d[1]   
                             }));
                         
-                            // Set up margins and dimensions for the chart
                             const margin = { top: 20, right: 10, bottom: 20, left: 0 };
                             const width = 320 - margin.left - margin.right;
                             const height = 200 - margin.top - margin.bottom;
-                        
-                            // Clear any previous content
+
                             d3.select(container).selectAll("*").remove();
-                        
-                            // Create an SVG element
+
                             const svg = d3
                                 .select(container)
                                 .append("svg")
@@ -788,42 +809,38 @@ definePackageLayer();
                                 .attr("height", height + margin.top + margin.bottom)
                                 .append("g")
                                 .attr("transform", `translate(${margin.left},${margin.top})`);
-                        
-                            // Set up the x and y scales
+
                             const x = d3.scaleLinear()
-                                .domain([0, d3.max(data, d => d.value)]) // Ensure that x-axis spans from 0 to the max value
+                                .domain([0, d3.max(data, d => d.value)]) 
                                 .range([0, width]);
                         
                             const y = d3.scaleBand()
                                 .domain(data.map(d => d.category))
                                 .range([0, height])
                                 .padding(0.1);
-                        
-                            // Create a background bar for each category to align images
+
                             svg.selectAll(".background-bar")
                                 .data(data)
                                 .enter()
                                 .append("rect")
                                 .attr("class", "background-bar")
                                 .attr("x", 0)
-                                .attr("y", d => y(d.category)) // Position based on the category
-                                .attr("width", width) // Set the width of the background bar to the full width
-                                .attr("height", y.bandwidth()) // Height of the background bar matches the category height
-                                .attr("fill", "#8D9AAC"); // Light grey color for background bar
-                        
-                            // Create bars for the chart
+                                .attr("y", d => y(d.category)) 
+                                .attr("width", width)
+                                .attr("height", y.bandwidth())
+                                .attr("fill", "#8D9AAC");
+
                             svg.selectAll(".bar")
                                 .data(data)
                                 .enter()
                                 .append("rect")
                                 .attr("class", "bar")
-                                .attr("x", 0) // Bars start from the left
-                                .attr("y", d => y(d.category)) // Position based on the category
-                                .attr("width", d => x(d.value)) // Set the bar width based on the value
-                                .attr("height", y.bandwidth()) // Set the bar height
-                                .attr("fill", "#556580"); // Set bar color
-                        
-                            // Add tooltip functionality
+                                .attr("x", 0) 
+                                .attr("y", d => y(d.category)) 
+                                .attr("width", d => x(d.value)) 
+                                .attr("height", y.bandwidth()) 
+                                .attr("fill", "#556580"); 
+
                             const tooltip = svg.append("g")
                                 .style("opacity", 0)
                                 .attr("class", "tooltip");
@@ -852,34 +869,33 @@ definePackageLayer();
                                 .enter()
                                 .append("text")
                                 .attr("class", "bar-label")
-                                .attr("x", 5) // Position the category label to the left of the bar
-                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                .attr("dy", ".35em") // Vertical alignment
-                                .attr("text-anchor", "start") // Align text to the left of the bar
+                                .attr("x", 5) 
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                .attr("dy", ".35em")
+                                .attr("text-anchor", "start")
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "10px")
                                 .text(d => d.category);
-                                
-                        
+
                                 svg.selectAll(".value-label")
                                 .data(data)
                                 .enter()
                                 .append("text")
                                 .attr("class", "value-label")
-                                .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
-                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                .attr("dy", ".35em") // Vertical alignment
-                                .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                .attr("x", width-5) 
+                                .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                .attr("dy", ".35em") 
+                                .attr("text-anchor", "end") 
                                 .attr("fill", "rgb(255,255,255,0.8)")
                                 .style("font-size", "12px")
-                                .text(d => `${d.value}%`); // Add "%" symbol to the value
-                             // Add title at the bottom-right of the SVG
+                                .text(d => `${d.value}%`); 
+
                                 svg.append("text")
-                                .attr("x", width - 2) // Position it towards the right side of the chart
-                                .attr("y", height +15) // Position it at the bottom
-                                .attr("text-anchor", "end") // Align text to the right side
+                                .attr("x", width - 2) 
+                                .attr("y", height +15) 
+                                .attr("text-anchor", "end") 
                                 .style("font-size", "14px")
-                                .text("Number of Stolen Packages"); // Title text     
+                                .text("Number of Stolen Packages");    
                             }
                                  
                                  const rawData5 = [
@@ -891,21 +907,17 @@ definePackageLayer();
                                 ];
                                 
                                 function createBarChart_Package3(rawData, container) {
-                                    // Prepare the data for the bar chart
                                     const data = rawData.map(d => ({
-                                        category: d[0], // Category name
-                                        value: d[1]     // Corresponding value
+                                        category: d[0], 
+                                        value: d[1]   
                                     }));
-                                
-                                    // Set up margins and dimensions for the chart
+
                                     const margin = { top: 0, right: 30, bottom: 20, left: 60 };
                                     const width = 600 - margin.left - margin.right;
                                     const height = 200 - margin.top - margin.bottom;
-                                
-                                    // Clear any previous content
+
                                     d3.select(container).selectAll("*").remove();
-                                
-                                    // Create an SVG element
+
                                     const svg = d3
                                         .select(container)
                                         .append("svg")
@@ -913,42 +925,38 @@ definePackageLayer();
                                         .attr("height", height + margin.top + margin.bottom)
                                         .append("g")
                                         .attr("transform", `translate(${margin.left},${margin.top})`);
-                                
-                                    // Set up the x and y scales
+
                                     const x = d3.scaleLinear()
-                                        .domain([0, d3.max(data, d => d.value)]) // Ensure that x-axis spans from 0 to the max value
+                                        .domain([0, d3.max(data, d => d.value)]) 
                                         .range([0, width]);
                                 
                                     const y = d3.scaleBand()
                                         .domain(data.map(d => d.category))
                                         .range([0, height])
                                         .padding(0.1);
-                                
-                                    // Create a background bar for each category to align images
+
                                     svg.selectAll(".background-bar")
                                         .data(data)
                                         .enter()
                                         .append("rect")
                                         .attr("class", "background-bar")
                                         .attr("x", 0)
-                                        .attr("y", d => y(d.category)) // Position based on the category
-                                        .attr("width", width) // Set the width of the background bar to the full width
-                                        .attr("height", y.bandwidth()) // Height of the background bar matches the category height
-                                        .attr("fill", "#8D9AAC"); // Light grey color for background bar
-                                
-                                    // Create bars for the chart
+                                        .attr("y", d => y(d.category)) 
+                                        .attr("width", width) 
+                                        .attr("height", y.bandwidth()) 
+                                        .attr("fill", "#8D9AAC"); 
+
                                     svg.selectAll(".bar")
                                         .data(data)
                                         .enter()
                                         .append("rect")
                                         .attr("class", "bar")
-                                        .attr("x", 0) // Bars start from the left
-                                        .attr("y", d => y(d.category)) // Position based on the category
-                                        .attr("width", d => x(d.value)) // Set the bar width based on the value
-                                        .attr("height", y.bandwidth()) // Set the bar height
-                                        .attr("fill", d => d.category === "Stay at home when expecting a package" ? "#1D3459" : "#556580"); // Change color for this specific category
-                                
-                                    // Add tooltip functionality
+                                        .attr("x", 0) 
+                                        .attr("y", d => y(d.category)) 
+                                        .attr("width", d => x(d.value)) 
+                                        .attr("height", y.bandwidth()) 
+                                        .attr("fill", d => d.category === "Stay at home when expecting a package" ? "#1D3459" : "#556580"); 
+
                                     const tooltip = svg.append("g")
                                         .style("opacity", 0)
                                         .attr("class", "tooltip");
@@ -971,82 +979,76 @@ definePackageLayer();
                                         .on("mouseout", function() {
                                             tooltip.style("opacity", 0);
                                         });
-                                
-                                    // Add category labels
+
                                     svg.selectAll(".bar-label")
                                         .data(data)
                                         .enter()
                                         .append("text")
                                         .attr("class", "bar-label")
-                                        .attr("x", 5) // Position the category label to the left of the bar
-                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                        .attr("dy", ".35em") // Vertical alignment
-                                        .attr("text-anchor", "start") // Align text to the left of the bar
+                                        .attr("x", 5) 
+                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                        .attr("dy", ".35em") 
+                                        .attr("text-anchor", "start") 
                                         .attr("fill", "rgb(255,255,255,0.8)")
                                         .style("font-size", "10px")
                                         .text(d => d.category);
-                                
-                                    // Add value labels
+
                                     svg.selectAll(".value-label")
                                         .data(data)
                                         .enter()
                                         .append("text")
                                         .attr("class", "value-label")
-                                        .attr("x", width - 5) // Set the x position to the right end of the background bar (end of the SVG)
-                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                        .attr("dy", ".35em") // Vertical alignment
-                                        .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                        .attr("x", width - 5) 
+                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                        .attr("dy", ".35em") 
+                                        .attr("text-anchor", "end")
                                         .attr("fill", "rgb(255,255,255,0.8)")
                                         .style("font-size", "14px")
-                                        .text(d => `${d.value}%`); // Add "%" symbol to the value
+                                        .text(d => `${d.value}%`);
+                                        
                                         svg.selectAll(".value-label")
                                         .data(data)
                                         .enter()
                                         .append("text")
                                         .attr("class", "value-label")
-                                        .attr("x", width-5) // Set the x position to the right end of the background bar (end of the SVG)
-                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) // Adjust the y to place text on top of the bar
-                                        .attr("dy", ".35em") // Vertical alignment
-                                        .attr("text-anchor", "end") // Align text to the right end of the background bar
+                                        .attr("x", width-5) 
+                                        .attr("y", d => y(d.category) + y.bandwidth() / 3 + 5) 
+                                        .attr("dy", ".35em") 
+                                        .attr("text-anchor", "end") 
                                         .attr("fill", "rgb(255,255,255,0.8)")
                                         .style("font-size", "12px")
-                                        .text(d => `${d.value}%`); // Add "%" symbol to the value
-                                     // Add title at the bottom-right of the SVG
+                                        .text(d => `${d.value}%`); 
+
                                         svg.append("text")
-                                        .attr("x", width - 2) // Position it towards the right side of the chart
-                                        .attr("y", height +15) // Position it at the bottom
-                                        .attr("text-anchor", "end") // Align text to the right side
+                                        .attr("x", width - 2)
+                                        .attr("y", height +15) 
+                                        .attr("text-anchor", "end") 
                                         .style("font-size", "14px")
-                                        .text("How People Prevent Package Theft"); // Title text    
+                                        .text("How People Prevent Package Theft");     
                                 
                                     }
                                 const container2 = document.getElementById("table-container2");
 
-                                // 글 내용과 스타일 정의
                                 const chartTitles = [
                                     { text: "44%", left: 40, top: 150, fontSize: "18px", color: "#1D3459", fontWeight: "bold" },
                                     { text: "of Americans have<br>had a Package Stolen", left: 40, top: 170, fontSize: "14px", color: "#556580", fontWeight: "normal" },
                                     { text: "$112.3", left: 210, top: 150, fontSize: "18px", color: "#1D3459", fontWeight: "bold" },
                                     { text: "Average Value of <br>Stolen Packages", left: 210, top: 170, fontSize: "14px", color: "#556580", fontWeight: "normal" }
                                 ];
-                                
-                                // 글 생성 및 스타일 적용
+
                                 chartTitles.forEach(titleInfo => {
-                                    // 제목 생성
                                     const titleElement = document.createElement("div");
-                                    titleElement.innerHTML = titleInfo.text;   // 글 내용 추가
-                                    titleElement.style.position = "absolute";  // 절대 위치
-                                    titleElement.style.textAlign = "left";  // 글 가운데 정렬
-                                    titleElement.style.marginBottom = "14px";  // 차트와의 간격
-                                    titleElement.style.fontSize = titleInfo.fontSize;  // 글 크기 설정
-                                    titleElement.style.fontWeight = titleInfo.fontWeight;  // fontWeight 설정 (ex: extra-bold 또는 normal)
-                                    titleElement.style.color = titleInfo.color;  // 글 색상 설정
-                                
-                                    // 위치 설정
-                                    titleElement.style.left = titleInfo.left + "px";  // 왼쪽 위치 설정
-                                    titleElement.style.top = titleInfo.top + "px";    // 위쪽 위치 설정
-                                
-                                    // 제목을 #table-container2의 첫 번째 자식으로 추가
+                                    titleElement.innerHTML = titleInfo.text;   
+                                    titleElement.style.position = "absolute";  
+                                    titleElement.style.textAlign = "left";  
+                                    titleElement.style.marginBottom = "14px";  
+                                    titleElement.style.fontSize = titleInfo.fontSize;  
+                                    titleElement.style.fontWeight = titleInfo.fontWeight;  
+                                    titleElement.style.color = titleInfo.color;  
+
+                                    titleElement.style.left = titleInfo.left + "px";  
+                                    titleElement.style.top = titleInfo.top + "px";   
+
                                     container2.insertBefore(titleElement, container2.firstChild);
                                 });                               
                                 
@@ -1055,23 +1057,20 @@ definePackageLayer();
                         
 
 function createTrianglePath(unit) {
-    const base = 10; // Fixed base size
-    const height = Math.pow(unit, 2) * 2; // Dynamic height based on the unit value
-
+    const base = 10;
+    const height = Math.pow(unit, 2) * 2; 
     return `M ${-base / 2} 0 L ${base / 2} 0 L 0 ${-height} Z`;
 }
 
 map.on('load', () => {
-    fetch('Unit_F.geojson')
+    fetch('Data/Unit_F.geojson')
         .then(response => response.json())
         .then(geojsonData => {
-            // Add GeoJSON layers to the map
             map.addSource('geojson-data', {
                 type: 'geojson',
                 data: geojsonData
             });
 
-            // Add a base fill layer (invisible)
             map.addLayer({
                 id: 'geojson-layer',
                 type: 'fill',
@@ -1082,20 +1081,18 @@ map.on('load', () => {
                 }
             });
 
-            // Add an outline layer for highlighting polygons
             map.addLayer({
                 id: 'geojson-outline',
                 type: 'line',
                 source: 'geojson-data',
                 paint: {
                     'line-color': '#ff0000',
-                    'line-opacity': 0, // Initially hidden
+                    'line-opacity': 0,
                     'line-width': 2
                 },
-                filter: ['==', 'id', ''] // Filter to show no polygons initially
+                filter: ['==', 'id', ''] 
             });
 
-            // Create an SVG overlay for the triangles
             const svg = d3.select(map.getCanvasContainer())
                 .append("svg")
                 .attr("class", "overlay")
@@ -1106,10 +1103,8 @@ map.on('load', () => {
                 .style("left", 0)
                 .style("display", "none");
 
-            // Define gradients
             const defs = svg.append("defs");
 
-            // Default gradient (red)
             const defaultGradient = defs.append("linearGradient")
                 .attr("id", "default-gradient")
                 .attr("x1", "0%")
@@ -1127,7 +1122,6 @@ map.on('load', () => {
                 .attr("stop-color", "Orange")
                 .attr("stop-opacity", 0);
 
-            // Clicked gradient (blue)
             const clickedGradient = defs.append("linearGradient")
                 .attr("id", "clicked-gradient")
                 .attr("x1", "0%")
@@ -1137,19 +1131,18 @@ map.on('load', () => {
 
             clickedGradient.append("stop")
                 .attr("offset", "0%")
-                .attr("stop-color", "red") // Change to desired color
+                .attr("stop-color", "red") 
                 .attr("stop-opacity", 1);
 
             clickedGradient.append("stop")
                 .attr("offset", "100%")
-                .attr("stop-color", "red") // Change to desired color
+                .attr("stop-color", "red") 
                 .attr("stop-opacity", 0);
 
-            // Draw triangles for all polygons
             const features = geojsonData.features;
 
-            let selectedTriangle = null; // To keep track of the selected triangle
-            let popup = null; // To keep track of the popup element
+            let selectedTriangle = null;
+            let popup = null; 
 
             const triangles = svg.selectAll("path")
                 .data(features)
@@ -1161,30 +1154,25 @@ map.on('load', () => {
                     return `translate(${x},${y})`;
                 })
                 .attr("d", d => createTrianglePath(d.properties.Unit))
-                .attr("fill", "url(#default-gradient)") // Default gradient fill
+                .attr("fill", "url(#default-gradient)") 
                 .attr("stroke", "transparent")
                 .attr("stroke-width", 1.5)
                 .on("click", function(event, d) {
-                    // Reset previously selected triangle
                     if (selectedTriangle) {
                         selectedTriangle.attr("fill", "url(#default-gradient)");
                     }
 
-                    // Highlight the clicked polygon
-                    map.setFilter('geojson-outline', ['==', 'id', d.properties.id]); // Assuming each polygon has a unique 'id'
+                    map.setFilter('geojson-outline', ['==', 'id', d.properties.id]); 
                     map.setPaintProperty('geojson-outline', 'line-opacity', .7);
 
-                    // Set clicked triangle as selected
                     selectedTriangle = d3.select(this);
-                    selectedTriangle.attr("fill", "url(#clicked-gradient)"); // Change fill to clicked gradient
+                    selectedTriangle.attr("fill", "url(#clicked-gradient)"); 
 
-                    // Remove existing popup
                     if (popup) {
                         popup.remove();
                         popup = null;
                     }
 
-                    // Create popup
                     const centroid = computeCentroid(d);
                     const { x, y } = map.project(centroid);
 
@@ -1202,7 +1190,7 @@ map.on('load', () => {
 
                     popup.html(`
                         <strong>Census Tarct:</strong> ${d.properties["Re_Income_New_York_Specific_Counties_Geographic Area Name"]
-                        .replace(/^Census Tract /, 'CT ') // "Census Tract " 제거
+                        .replace(/^Census Tract /, 'CT ') 
                         .replace(/;/g, ',')}<br> 
                         <strong>Median Income:</strong> $${parseInt(d.properties["Re_Income_New_York_Specific_Counties_Estimate!!Households!!Median income (dollars)"])
                         .toLocaleString()}<br> <!-- 천 단위 콤마 추가 -->
@@ -1211,29 +1199,23 @@ map.on('load', () => {
                         <strong>District:</strong> ${d.properties["Destrict"]}
                     `);
                 });
-
-            // Clear selection when clicking outside triangles
             map.on('click', (e) => {
                 const featuresAtPoint = map.queryRenderedFeatures(e.point, { layers: ['geojson-layer'] });
 
                 if (featuresAtPoint.length === 0) {
-                    // Reset the outline and selected triangle if no feature is clicked
                     map.setPaintProperty('geojson-outline', 'line-opacity', 0);
-                    map.setFilter('geojson-outline', ['==', 'id', '']); // Reset filter
+                    map.setFilter('geojson-outline', ['==', 'id', '']); 
 
                     if (selectedTriangle) {
                         selectedTriangle.attr("fill", "url(#default-gradient)");
                         selectedTriangle = null;
                     }
-
                     if (popup) {
                         popup.remove();
                         popup = null;
                     }
                 }
             });
-
-            // Re-draw triangles on map move or zoom
             map.on('move', () => {
                 triangles.attr("transform", d => {
                     const centroid = computeCentroid(d);
@@ -1244,22 +1226,19 @@ map.on('load', () => {
             
          
             function heatmap(map) {
-                // Adding Aged_65 GeoJSON data as a source
                 map.addSource('aged-65', {
                     type: 'geojson',
-                    data: 'Aged_65.geojson' // GeoJSON data file path
+                    data: 'Data/Aged_65.geojson' 
                 });
-            
-                // Adding Disability GeoJSON data as a source
+
                 map.addSource('disability', {
                     type: 'geojson',
-                    data: 'Disability.geojson' // GeoJSON data file path
+                    data: 'Data/Disability.geojson' 
                 });
-            
-                // Adding Work_50 GeoJSON data as a source
+
                 map.addSource('work-50', {
                     type: 'geojson',
-                    data: 'Work_50.geojson' // GeoJSON data file path
+                    data: 'Data/Work_50.geojson' 
                 });
             
                 map.addLayer({
@@ -1271,7 +1250,7 @@ map.on('load', () => {
                         'heatmap-color': [
                             'interpolate', ['linear'], ['heatmap-density'],
                             0, 'rgba(32, 0, 0, 0)',
-                            0.1, 'rgba(32, 235, 150, 0.8)', // Blue green
+                            0.1, 'rgba(32, 235, 150, 0.8)', 
                             0.3, 'rgba(32, 235, 150, 0.5)', 
                             0.9, 'rgba(32, 235, 150, 0.2)'
                         ],
@@ -1282,7 +1261,7 @@ map.on('load', () => {
                         
                     }
                 });
-                // Adding Heatmap layers for each source with different color schemes
+
                 map.addLayer({
                     id: 'heatmap-aged-65',
                     type: 'heatmap',
@@ -1291,7 +1270,7 @@ map.on('load', () => {
                     paint: {
                         'heatmap-color': [
                             'interpolate', ['linear'], ['heatmap-density'],
-                            0, 'rgba(255, 255, 0, 0)', // Yellow
+                            0, 'rgba(255, 255, 0, 0)', 
                             0.1, 'rgba(255, 255, 0, 0.8)', 
                             0.3, 'rgba(255, 255, 0, 0.5)',
                             0.9, 'rgba(255, 255, 0, 0.2)'
@@ -1312,7 +1291,7 @@ map.on('load', () => {
                         'heatmap-color': [
                             'interpolate', ['linear'], ['heatmap-density'],
                             0, 'rgba(255, 0, 0, 0)',
-                            0.1, 'rgba(255, 0, 0, 0.8)', // Red
+                            0.1, 'rgba(255, 0, 0, 0.8)',
                             0.3, 'rgba(219, 0, 0, 0.5)', 
                             0.9, 'rgba(255, 0, 0, 0.2)'
                         ],
@@ -1320,8 +1299,6 @@ map.on('load', () => {
                         'heatmap-intensity': 0.3,
                         'heatmap-opacity': 0.7,
                         'heatmap-radius' : 10,
-                        
-
                     }
                 });
               
@@ -1341,15 +1318,15 @@ map.on('load', () => {
                 map.setLayoutProperty('heatmap-aged-65', 'visibility', 'none');
                 map.setLayoutProperty('heatmap-disability', 'visibility', 'none');
                 map.setLayoutProperty('heatmap-work-50', 'visibility', 'none');
-                hideHeatmapControls(); // 버튼 컨트롤 숨기기
+                hideHeatmapControls(); 
             }
             function showHeatmap(map) {
                 map.setLayoutProperty('heatmap-aged-65', 'visibility', 'visible');
                 map.setLayoutProperty('heatmap-disability', 'visibility', 'visible');
                 map.setLayoutProperty('heatmap-work-50', 'visibility', 'visible');
-                showHeatmapControls(); // 버튼 컨트롤 보이기
+                showHeatmapControls(); 
             }
-            // 버튼 클릭 이벤트 등록
+
             document.getElementById('btn-aged-65').addEventListener('click', () => {
                 toggleHeatmapLayer(map, 'heatmap-aged-65');
             });
@@ -1364,20 +1341,14 @@ map.on('load', () => {
             
             heatmap(map);
             hideHeatmap(map);
-            const path = d3.geoPath();  // No need to redefine this inside the listener
-let isBoroughActive = false;
-            
-
-
-
-
-
+            const path = d3.geoPath();  
+            let isBoroughActive = false;
 
             function hideAllContents() {
                 document.getElementById("content-title").textContent = "";
                 document.getElementById("content-text").textContent = "";
                 d3.select(".overlay").style("display", "none");
-                // Remove Trader layer and source
+
                 if (map.getLayer('Trader_Loc')) {
                     map.removeLayer('Trader_Loc');
                 }
@@ -1385,7 +1356,6 @@ let isBoroughActive = false;
                     map.removeSource('Trader');
                 }
 
-                // Remove Walmart layer and source
                 if (map.getLayer('Walmart_Loc')) {
                     map.removeLayer('Walmart_Loc');
                 }
@@ -1393,7 +1363,6 @@ let isBoroughActive = false;
                     map.removeSource('Walmart');
                 }
 
-                // Remove Whole Food layer and source
                 if (map.getLayer('Whole_Loc')) {
                     map.removeLayer('Whole_Loc');
                 }
@@ -1401,7 +1370,6 @@ let isBoroughActive = false;
                     map.removeSource('Whole_Food');
                 }
 
-                // Remove Whole Food layer and source
                 if (map.getLayer('Amazon_Loc')) {
                     map.removeLayer('Amazon_Loc');
                 }
@@ -1409,15 +1377,15 @@ let isBoroughActive = false;
                     map.removeSource('Amazon');
                 }
                 if (map.getLayer('package-layer')) {
-                    map.removeLayer('package-layer'); // 먼저 레이어를 제거
+                    map.removeLayer('package-layer'); 
                 }
                 
                 if (map.getSource('package-source')) {
-                    map.removeSource('package-source'); // 그런 다음 소스를 제거
+                    map.removeSource('package-source'); 
                 }
-     // Remove D3 chart from the container
-     const chartContainer = "#table-container"; // 사용한 컨테이너와 동일하게 설정
-     d3.select(chartContainer).selectAll("*").remove(); // 차트 제거
+
+     const chartContainer = "#table-container"; 
+     d3.select(chartContainer).selectAll("*").remove(); 
      hideHeatmap(map);
     }
 document.getElementById('table-container2').style.display = 'none';  
@@ -1442,12 +1410,12 @@ document.getElementById("btn0").addEventListener("click", function() {
         document.getElementById('delivery_fee_explain').style.display = 'none'; 
         document.getElementById('content-text2').style.display = 'block';  
     });
-// Button click event listeners for changing content
+
 document.getElementById("btn1").addEventListener("click", function() {
     hideAllContents();
     document.getElementById("content-little-title").textContent = "Cost Burden and Social Discomfort of Delivery Services";
     document.getElementById("content-title").innerHTML = '<span style="color: black;">Delivery Fee Burden</span> by House-income';
-    document.getElementById("content-text").textContent = "When examining the burden of delivery fees in relation to median income by Census Tract in New York City, most people experience a burden level of about 2. However, there are those who feel the burden is more than five times greater compared to the highest income earners, which can make using delivery services difficult.";
+    document.getElementById("content-text").textContent = "To calculate the burden of delivery fees, we compared the income of each household to the highest-income household. Specifically, we calculated the ratio of each household's income to the income of the highest-earning household. Using this ratio, we determined the relative burden of delivery service fees by incorporating the annual average cost of delivery services, which is approximately $130. The burden levels are scaled from 1 to a maximum of 15, and most people experience a burden level of about 2. However, there are those who feel the burden is more than four times greater compared to the highest income earners, which can make using delivery services difficult.";
     d3.select(".overlay").style("display", "block");
     document.getElementById('table-container2').style.display = 'none';  
     const container = "#table-container";
@@ -1482,44 +1450,41 @@ document.getElementById("btn2").addEventListener("click", function() {
     document.getElementById('content-text2').style.display = 'none';  
      // 이미지 추가
      const container = document.getElementById("table-container");
-     container.style.display = "block"; // 컨테이너 보이게 설정
-     container.innerHTML = ""; // 이전 내용 지우기
+     container.style.display = "block"; 
+     container.innerHTML = ""; 
  
      const img = document.createElement("img");
-     img.src = "Borough_Delivery_Usage.png"; // 여기에 이미지 경로 설정
-     img.style.width = "100%"; // 필요에 따라 스타일 조정
+     img.src = "Pic/Borough_Delivery_Usage.png"; 
+     img.style.width = "100%"; 
      img.style.height = "auto";
  
      container.appendChild(img);
     isBoroughActive = !isBoroughActive;
     
-    // Update triangle colors based on the `Destrict` property
     triangles.attr("fill", d => {
         if (isBoroughActive) {
             const borough = d.properties["Destrict"];
             
-            // Return the corresponding gradient for each borough
+
             return borough === 1 ? "url(#borough-gradient-1)" :
                    borough === 2 ? "url(#borough-gradient-2)" :
                    borough === 3 ? "url(#borough-gradient-3)" :
                    borough === 4 ? "url(#borough-gradient-4)" :
-                   "url(#default-gradient)"; // Default gradient for other boroughs
+                   "url(#default-gradient)"; 
         } else {
-            return "url(#default-gradient)"; // Default gradient when borough is not active
+            return "url(#default-gradient)"; 
         }
     });
 
-    // Handle Destrict.geojson layer visibility
     if (isBoroughActive) {
-        fetch('Destrict.geojson')
+        fetch('Data/Destrict.geojson')
         .then(response => response.json())
         .then(boroughData => {
             map.addSource('borough-data', {
                 type: 'geojson',
                 data: boroughData
             });
-    
-            // Add a fill layer with color based on the 'Destrict' property
+
             map.addLayer({
                 id: 'borough-fill',
                 type: 'fill',
@@ -1528,61 +1493,52 @@ document.getElementById("btn2").addEventListener("click", function() {
                     'fill-color': [
                         'match', 
                         ['get', 'Destrict'], 
-                        1, '#428tf4', // Replace 'value1' with actual values from your 'Destrict' field
-                        2, '#0f9d58', // Replace 'value2' with another value
+                        1, '#428tf4',
+                        2, '#0f9d58', 
                         3, '#f4b400',
-                        4, '#db4437',  // And so on, for each distinct 'Destrict' value
-                        '#808080' // Default color for values not matched
+                        4, '#db4437',  
+                        '#808080' 
                     ],
-                    'fill-opacity': 0.1 // Adjust the fill opacity as needed
+                    'fill-opacity': 0.1
                 }
             });
-    
-            // Add a line layer for the borough outlines
+
             map.addLayer({
                 id: 'borough-outline',
                 type: 'line',
                 source: 'borough-data',
                 paint: {
-                    'line-color': '#ffffff', // Outline color
+                    'line-color': '#ffffff', 
                     'line-opacity': 0.3,
-                    'line-width': 1 // Adjust the line width as needed
+                    'line-width': 1 
                 }
             });
         });
-        
-        // Load Destrict.geojson and add MultiPolygon outline using D3
-        d3.json("Destrict.geojson").then(function(geojsonData) {
-            // Select and append the MultiPolygon paths with a white outline
+
+        d3.json("Data/Destrict.geojson").then(function(geojsonData) {
             svg.selectAll(".destrict")
                 .data(geojsonData.features)
                 .enter()
                 .append("path")
                 .attr("class", "destrict")
-                .attr("d", path) // Use geoPath to generate the path from coordinates
-                .attr("fill", "none") // No fill color for the MultiPolygon
-                .attr("stroke", "white") // Set the border color to white
-                .attr("stroke-width", 2) // Set stroke width for visibility
-                .attr("opacity", 0.5); // Set opacity to make the outline more visible
+                .attr("d", path) 
+                .attr("fill", "none") 
+                .attr("stroke", "white") 
+                .attr("stroke-width", 2) 
+                .attr("opacity", 0.5); 
         });
 
     } else {
-        // Remove the Destrict layer from Mapbox
         map.removeLayer('borough-fill');
         map.removeLayer('borough-outline');
         map.removeSource('borough-data');
-
-        // Remove the SVG paths from the D3 visualization
         svg.selectAll(".destrict").remove();
-
-        // Reset the outline opacity (if needed)
         map.setPaintProperty('geojson-outline', 'line-opacity', 0);
     }
 });
 
-// Define borough gradients for triangle color updates
 const boroughGradients = defs.selectAll(".borough-gradient")
-    .data([1, 2, 3, 4]) // Define borough IDs
+    .data([1, 2, 3, 4]) 
     .enter()
     .append("linearGradient")
     .attr("class", "borough-gradient")
@@ -1594,8 +1550,7 @@ const boroughGradients = defs.selectAll(".borough-gradient")
 
 boroughGradients.append("stop")
     .attr("offset", "0%")
-    .attr("stop-color", d => {
-        // Define the color for the start of each gradient based on borough
+ .attr("stop-color", d => {
         return d === 1 ? "blue" :
                d === 2 ? "green" :
                d === 3 ? "Orange" :
@@ -1606,7 +1561,6 @@ boroughGradients.append("stop")
 boroughGradients.append("stop")
     .attr("offset", "100%")
     .attr("stop-color", d => {
-        // Define the color for the end of each gradient based on borough
         return d === 1 ? "blue" :
                d === 2 ? "green" :
                d === 3 ? "Orange" :
