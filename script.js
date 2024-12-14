@@ -1570,3 +1570,25 @@ boroughGradients.append("stop")
         });
 });
 
+let currentSection = 0;
+
+const sections = [
+    document.getElementById("btn0"),
+    document.getElementById("btn1"),
+    document.getElementById("btn2"),
+    document.getElementById("btn3")
+];
+
+window.addEventListener("wheel", function(event) {
+    if (event.deltaY > 0) { 
+        if (currentSection < sections.length - 1) {
+            currentSection++;
+            sections[currentSection].click();
+        }
+    } else {
+        if (currentSection > 0) {
+            currentSection--;
+            sections[currentSection].click();  
+        }
+    }
+});
